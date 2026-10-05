@@ -1,0 +1,12 @@
+{
+  "name": "adlc-ae-workflow",
+  "owner": { "name": "Dean Terneu" },
+  "description": "Local marketplace for the AE harness plugin.",
+  "plugins": [
+    {
+      "name": "harness",
+      "source": "./harness",
+      "description": "Custom agent harness: plan phase and specialist review agents."
+    }
+  ]
+}
