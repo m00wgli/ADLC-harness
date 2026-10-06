@@ -59,7 +59,7 @@ Confirm `.sandcastle/.env` is git-ignored: `git check-ignore .sandcastle/.env`.
 npx sandcastle docker build-image
 ```
 
-The image installs the harness plugin from GitHub, so agents in the sandbox can use `harness:tdd` and `harness:code-review`. Rebuild with `--no-cache` after the harness changes.
+The image installs the harness plugin from GitHub, so agents in the sandbox can use `harness:tdd` and `harness:code-review`. After a harness update, set `ARG HARNESS_VERSION` in `.sandcastle/Dockerfile` to the new plugin version and rebuild; the changed value makes Docker reinstall the plugin.
 
 ## 6. Smoke test
 

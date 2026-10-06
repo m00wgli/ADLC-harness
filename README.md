@@ -34,6 +34,23 @@ Or install it in another project:
 /plugin install harness@adlc-ae-workflow
 ```
 
+## Update
+
+After a new version is pushed (bump `version` in `harness/.claude-plugin/plugin.json`, or the update is skipped):
+
+```bash
+claude plugin marketplace update adlc-ae-workflow
+claude plugin update harness@adlc-ae-workflow
+```
+
+Or inside Claude Code: `/plugin` → Marketplaces → `adlc-ae-workflow` → Update. Then restart Claude Code.
+
+Projects using the build loop also need the new harness inside their Docker image. Set `ARG HARNESS_VERSION` in `.sandcastle/Dockerfile` to the new version, then rebuild:
+
+```bash
+npx sandcastle docker build-image
+```
+
 ## Flow
 
 1. `/harness:setup-harness-skills`: once per project. Connects the GitHub issue tracker and labels.
