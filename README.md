@@ -8,9 +8,15 @@ harness/
 ├── agents/          code-reviewer, security-auditor, test-engineer, web-performance-auditor
 └── skills/
     ├── setup/       setup-harness-skills
+    ├── intake/      triage
     └── plan/        grill-with-docs, grilling, domain-modeling, to-spec, to-tickets
+sandcastle/          fork of mattpocock/sandcastle (git submodule): runs the build loop in Docker sandboxes
 reference/           source repos the harness borrows from (reference only)
 ```
+
+Clone with submodules: `git clone --recurse-submodules https://github.com/m00wgli/ADLC-harness.git`. If you already cloned without them, run `git submodule update --init`.
+
+To pull Matt's latest Sandcastle changes into the fork: `cd sandcastle && git fetch upstream && git merge upstream/main && git push`, then commit the updated submodule pointer here.
 
 ## Use
 
