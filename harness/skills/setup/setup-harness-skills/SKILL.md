@@ -26,14 +26,13 @@ Look at the current repo to understand its starting state. Read whatever exists;
 - `docs/adr/` and any `src/*/docs/adr/` directories
 - `docs/agents/`: does this skill's prior output already exist?
 - `.scratch/`: a sign that a local-markdown issue tracker convention is already in use
-- Is the `triage` skill installed? (a `triage` skill folder alongside this one, or `triage` in your available skills.) This decides whether Section B runs at all.
 - Monorepo signals: a `pnpm-workspace.yaml`, a `workspaces` field in `package.json`, or a populated `packages/*` with its own `src/`. These are present only in a genuinely large multi-package repo; their absence means single-context, which is almost every repo.
 
 ### 2. Present findings and ask
 
 Summarise what's present and what's missing. Then take the sections in order. One section, one answer, then the next.
 
-Lead each section with the recommended answer so the user can accept it in a word. Give a one-line explainer only when the choice genuinely branches; skip the section entirely when exploration already settled it (Section B when `triage` isn't installed, Section C when there's no monorepo).
+Lead each section with the recommended answer so the user can accept it in a word. Give a one-line explainer only when the choice genuinely branches; skip the section entirely when exploration already settled it (Section C when there's no monorepo).
 
 **Section A: Issue tracker.**
 
@@ -48,9 +47,9 @@ Default posture: these skills were designed for GitHub. If a `git remote` points
 
 Record the choice in `docs/agents/issue-tracker.md`. The GitHub and GitLab templates carry a "PRs as a request surface" flag, defaulted **off**. Leave it off and don't raise it: a user who wants external PRs in the triage queue can flip the flag in the file later.
 
-**Section B: Triage label vocabulary.** Skip this section entirely if the `triage` skill isn't installed (exploration told you), since an uninstalled skill needs no labels.
+**Section B: Triage label vocabulary.** Always run this section. `triage` ships with the harness, and `to-spec` and `to-tickets` apply `ready-for-agent` too.
 
-If it is installed, ask exactly one question:
+Ask exactly one question:
 
 > Do you want to keep the default triage labels? (recommended: **yes**)
 
@@ -65,7 +64,7 @@ Offer **multi-context** (a root `GLOSSARY-MAP.md` pointing to per-context `GLOSS
 Show the user a draft of:
 
 - The `## Agent skills` block to add to whichever of `CLAUDE.md` / `AGENTS.md` is being edited (see step 4 for selection rules)
-- The contents of `docs/agents/issue-tracker.md`, `docs/agents/domain.md`, and `docs/agents/triage-labels.md` (the last only when `triage` is installed)
+- The contents of `docs/agents/issue-tracker.md`, `docs/agents/domain.md`, and `docs/agents/triage-labels.md`
 
 Let them edit before writing.
 
@@ -99,17 +98,31 @@ The block:
 [one-line summary of layout: "single-context" or "multi-context"]. See `docs/agents/domain.md`.
 ```
 
-Include the `### Triage labels` sub-block, and write `docs/agents/triage-labels.md`, only when `triage` is installed and Section B ran. When it isn't, both are omitted.
+Always include the `### Triage labels` sub-block and write `docs/agents/triage-labels.md`.
 
 Then write the docs files using the seed templates in this skill folder as a starting point:
 
 - [issue-tracker-github.md](./issue-tracker-github.md): GitHub issue tracker
 - [issue-tracker-gitlab.md](./issue-tracker-gitlab.md): GitLab issue tracker
 - [issue-tracker-local.md](./issue-tracker-local.md): local-markdown issue tracker
-- [triage-labels.md](./triage-labels.md): label mapping (only if `triage` is installed)
+- [triage-labels.md](./triage-labels.md): label mapping
 - [domain.md](./domain.md): domain doc consumer rules + layout
 
 For "other" issue trackers, write `docs/agents/issue-tracker.md` from scratch using the user's description.
+
+**Create the labels on the tracker.** Skills fail when they apply a label that doesn't exist yet. For GitHub, create every state label from `docs/agents/triage-labels.md` plus the `bug` and `enhancement` category labels. `--force` makes this safe to re-run:
+
+```bash
+gh label create needs-triage    --color FBCA04 --description "Maintainer needs to evaluate this issue" --force
+gh label create needs-info      --color D876E3 --description "Waiting on reporter for more information" --force
+gh label create ready-for-agent --color 0E8A16 --description "Fully specified, ready for an AFK agent" --force
+gh label create ready-for-human --color 1D76DB --description "Requires human implementation" --force
+gh label create wontfix         --color FFFFFF --description "Will not be actioned" --force
+gh label create bug             --color D73A4A --description "Something is broken" --force
+gh label create enhancement     --color A2EEEF --description "New feature or improvement" --force
+```
+
+Use the user's override strings if Section B collected any. For GitLab, use `glab label create` with the same names. For local markdown, skip this step. Then list the labels (`gh label list`) and confirm each one exists.
 
 ### 5. Done
 

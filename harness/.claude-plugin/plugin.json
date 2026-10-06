@@ -4,5 +4,5 @@
   "version": "0.1.0",
   "description": "Custom agent harness: plan phase (grill, PRD, tickets on GitHub) and specialist review agents.",
   "author": { "name": "Dean Terneu" },
-  "skills": ["./skills/setup/", "./skills/plan/"]
+  "skills": ["./skills/setup/", "./skills/plan/", "./skills/intake/"]
 }
