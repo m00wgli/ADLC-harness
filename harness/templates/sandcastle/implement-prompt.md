@@ -22,7 +22,7 @@ Recent commits:
 
 Call the Skill tool with `harness:tdd` and follow it: one failing test, then just enough code to pass, repeat until the acceptance criteria in the ticket are met.
 
-If the project has no test setup yet, add the smallest one that fits the ADRs, plus `test` and `typecheck` scripts in `package.json`. The loop gates every ticket on `npm run typecheck` and `npm run test`.
+The loop gates every ticket on `npm run typecheck` and `npm run test`. If either script is missing, or `test` is npm's placeholder (`echo "Error: no test specified" && exit 1`), set up the smallest real one that fits the ADRs as part of this ticket.
 
 # COMMIT
 

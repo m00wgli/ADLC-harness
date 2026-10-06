@@ -20,7 +20,7 @@ You are the **orchestrator**. You do not write the code yourself. The build loop
 
 1. **Check setup.** `.sandcastle/main.mts` must exist and Docker must be running (`docker version`). If either is missing, tell the user to run `/harness:setup-build-loop` and stop.
 
-2. **Read the spec.** Get the PRD number from the arguments; ask if none was given. Read it with `gh issue view <n>` and list its tickets (open `ready-for-agent` issues that name it as parent). Show the user the tickets and which ones are unblocked now. The PRD itself must carry the `prd` label, not `ready-for-agent`, or the loop would try to build it.
+2. **Read the spec.** Get the PRD number from the arguments; ask if none was given. Read it with `gh issue view <n>` and list its tickets (open `ready-for-agent` issues that name it as parent). Show the user the tickets and which ones are unblocked now. Read blockers from GitHub's native dependencies, `gh api repos/{owner}/{repo}/issues/<n> --jq .issue_dependencies_summary.blocked_by` (open blockers), plus each ticket's `## Blocked by` section. `gh issue view --json` does not show them. The PRD itself must carry the `prd` label, not `ready-for-agent`, or the loop would try to build it.
 
 3. **Start from a clean tree.** `git status` must be clean, because the loop merges into the current branch. If it isn't, ask the user to commit or stash first.
 

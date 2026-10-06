@@ -25,6 +25,8 @@ Check each one and stop with a clear instruction when something is missing:
 npm install --save-dev @ai-hero/sandcastle zod tsx
 ```
 
+If `scripts.test` in `package.json` is npm's placeholder (`echo "Error: no test specified" && exit 1`), remove it (`npm pkg delete scripts.test`). The loop's gate skips missing scripts, but a placeholder always fails. The first ticket sets up the real test and typecheck scripts.
+
 ## 3. Copy the template
 
 If `.sandcastle/` already exists, keep its `.env` and ask the user before replacing the other files.
