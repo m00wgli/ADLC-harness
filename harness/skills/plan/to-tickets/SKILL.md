@@ -85,7 +85,7 @@ Do NOT close or modify any parent issue.
 
 ## Parent
 
-A reference to the parent issue on the tracker (if the source was an existing issue, otherwise omit this section).
+A reference to the parent PRD issue (`#<n>`). Always include it when the work comes from a PRD; if the user did not pass the PRD number, ask for it. The build loop uses this line to find a PRD's tickets.
 
 ## What to build
 

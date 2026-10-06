@@ -118,6 +118,7 @@ gh label create needs-info      --color D876E3 --description "Waiting on reporte
 gh label create ready-for-agent --color 0E8A16 --description "Fully specified, ready for an AFK agent" --force
 gh label create ready-for-human --color 1D76DB --description "Requires human implementation" --force
 gh label create wontfix         --color FFFFFF --description "Will not be actioned" --force
+gh label create prd             --color 5319E7 --description "Product requirements document; parent of tickets" --force
 gh label create bug             --color D73A4A --description "Something is broken" --force
 gh label create enhancement     --color A2EEEF --description "New feature or improvement" --force
 ```

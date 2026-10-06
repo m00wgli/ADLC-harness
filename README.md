@@ -6,11 +6,13 @@ A custom agent harness for Claude Code, packaged as the `harness` plugin. Its sk
 harness/
 ├── .claude-plugin/plugin.json
 ├── agents/          code-reviewer, security-auditor, test-engineer, web-performance-auditor
-└── skills/
-    ├── setup/       setup-harness-skills
-    ├── intake/      triage
-    ├── plan/        grill-with-docs, grilling, domain-modeling, to-spec, to-tickets
-    └── build/       implement, implement-spec, tdd, code-review, pr, diagnosing-bugs, codebase-design
+├── skills/
+│   ├── setup/       setup-harness-skills, setup-build-loop
+│   ├── intake/      triage
+│   ├── plan/        grill-with-docs, grilling, domain-modeling, to-spec, to-tickets
+│   └── build/       implement, implement-spec, tdd, code-review, pr, diagnosing-bugs, codebase-design
+└── templates/
+    └── sandcastle/  build loop copied into each project by setup-build-loop
 sandcastle/          fork of mattpocock/sandcastle (git submodule): runs the build loop in Docker sandboxes
 reference/           source repos the harness borrows from (reference only)
 ```
@@ -32,12 +34,14 @@ Or install it in another project:
 /plugin install harness@adlc-ae-workflow
 ```
 
-## Plan flow
+## Flow
 
 1. `/harness:setup-harness-skills`: once per project. Connects the GitHub issue tracker and labels.
 2. `/harness:grill-with-docs`: sharpens the idea by interview and writes `GLOSSARY.md` and ADRs.
 3. `/harness:to-spec`: publishes the PRD as a GitHub issue.
-4. `/harness:to-tickets`: splits the PRD into GitHub issues with blocking links.
+4. `/harness:to-tickets #<PRD>`: splits the PRD into GitHub issues with blocking links.
+5. `/harness:setup-build-loop`: once per project. Sets up Sandcastle and the Docker image.
+6. `/harness:implement-spec #<PRD>`: builds the tickets in parallel sandboxes (tdd → test gate → review → merge).
 
 ## Credits
 

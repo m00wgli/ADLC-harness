@@ -1,40 +1,46 @@
 ---
 name: implement-spec
-description: "Implement the result of /to-spec and /to-tickets in code."
+description: "Implement the result of /harness:to-spec and /harness:to-tickets in code, by running the Sandcastle build loop: parallel Docker sandboxes, test-first, gated on the project's checks and a code review."
+argument-hint: "#<PRD issue number>"
 disable-model-invocation: true
 ---
 
-You have been provided a spec. This spec should have tickets associated with it, describing how to implement the spec.
+You have been given a spec (a PRD issue) whose tickets describe how to implement it. The goal: every unblocked `ready-for-agent` ticket under that PRD built, gated, merged into the current branch, and closed.
 
-The issue tracker should have been provided to you. If not, tell the user to run `/harness:setup-harness-skills`.
+You are the **orchestrator**. You do not write the code yourself. The build loop in `.sandcastle/main.mts` does, in Docker sandboxes:
 
-The goal is the entire spec implemented on a single **integration branch**, with every ticket resolved the way the issue tracker closes work.
-
-The tickets are not a list of steps. They are a **task graph** with blocking relationships between them. This means there is always a **frontier** of tickets which are ready to be grabbed.
-
-Communication to and from subagents should be sparse. Communicate primarily through **context pointers**: to the spec, tickets, research notes, and previous commits. Don't duplicate information already available via pointers.
-
-**Implementer subagents** should be run in the background where possible for maximum concurrency.
+1. **Plan:** pick the tickets whose blockers are all closed (the **frontier**).
+2. **Build:** one sandbox and branch (`sandcastle/issue-<n>`) per ticket, in parallel. Each agent uses `harness:tdd`.
+3. **Gate:** the loop runs `npm run typecheck` and `npm run test` itself. A failing ticket gets up to 3 fix attempts, then it is left unmerged.
+4. **Review:** `harness:code-review` against the ticket and PRD, fixes applied, gate rerun.
+5. **Merge:** passing branches are merged into the current branch and their issues closed.
+6. Repeat until no ticket is unblocked.
 
 ## Steps
 
-1. Read the spec and tickets to understand the task graph.
+1. **Check setup.** `.sandcastle/main.mts` must exist and Docker must be running (`docker version`). If either is missing, tell the user to run `/harness:setup-build-loop` and stop.
 
-2. (optional) Use an **exploration subagent** to conduct any exploration required by the tickets - relevant codebase files or external documentation. Ensure the exploration subagent can save files - it should save its markdown notes in a directory outside the repo, accessible by all future subagents. This lets **implementer subagents** focus on implementation rather than exploration.
+2. **Read the spec.** Get the PRD number from the arguments; ask if none was given. Read it with `gh issue view <n>` and list its tickets (open `ready-for-agent` issues that name it as parent). Show the user the tickets and which ones are unblocked now. The PRD itself must carry the `prd` label, not `ready-for-agent`, or the loop would try to build it.
 
-3. Create the integration branch. If the issue tracker closes work through PRs, or the user asks for one, open a draft PR after the first merge in step 5 (a branch with no commits ahead of main can't open one), marked as closing the spec and tickets.
+3. **Start from a clean tree.** `git status` must be clean, because the loop merges into the current branch. If it isn't, ask the user to commit or stash first.
 
-4. Use **implementer subagents** to implement each ticket, each in its own worktree on its own branch. Each implementer subagent:
-   - confirms its worktree is based on the integration branch before starting, and resets onto it if not;
-   - calls the Skill tool with `harness:tdd` to build the ticket;
-   - merges the integration branch tip into its own branch before reporting done
+4. **Run the loop in the background:**
 
-5. Once an **implementer subagent** completes, merge its work to the integration branch with a **merger subagent**.
+   ```bash
+   npx tsx .sandcastle/main.mts <PRD number>
+   ```
 
-6. If this changes the **frontier** of available tickets, kick off more **implementer subagents** to work on the new tickets. This allows for maximum concurrency.
+   Tell the user it has started, which tickets are in the first wave, and where the logs are (`.sandcastle/logs/`; each run prints its own log path).
 
-7. Once all tickets are complete, call the Skill tool with `harness:code-review` on the integration branch. Fix all issues raised by the code review in a single **implementer subagent**.
+5. **Monitor.** Check progress from the loop's output and logs, not by reading the sandboxes' code. Report when a wave finishes: which tickets passed (✓) and which did not (✗, with the reason the loop printed).
 
-8. If a draft PR exists, mark it ready for review. Otherwise, resolve each ticket the way the issue tracker closes work, and report the integration branch.
+6. **When the loop ends**, report:
+   - tickets merged and closed;
+   - tickets left open, with why (gate failed, no commits, still blocked);
+   - the commits added to the branch (`git log --oneline`).
 
-9. Clean up all **implementer subagent** worktrees.
+   Do not push. The human reviews the merged result: this is the human quality gate. Suggest `git push` (or a PR) once they are happy.
+
+7. **Failed tickets.** For a ticket that failed its gate, read its log and the branch `sandcastle/issue-<n>`, summarise what went wrong, and offer to rerun the loop, which reuses the branch, or to hand it to a human with the `ready-for-human` label.
+
+The issue tracker should have been provided to you. If not, tell the user to run `/harness:setup-harness-skills`.
