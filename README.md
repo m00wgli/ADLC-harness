@@ -9,7 +9,8 @@ harness/
 └── skills/
     ├── setup/       setup-harness-skills
     ├── intake/      triage
-    └── plan/        grill-with-docs, grilling, domain-modeling, to-spec, to-tickets
+    ├── plan/        grill-with-docs, grilling, domain-modeling, to-spec, to-tickets
+    └── build/       implement, implement-spec, tdd, code-review, pr, diagnosing-bugs, codebase-design
 sandcastle/          fork of mattpocock/sandcastle (git submodule): runs the build loop in Docker sandboxes
 reference/           source repos the harness borrows from (reference only)
 ```
