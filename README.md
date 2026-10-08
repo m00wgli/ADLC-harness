@@ -61,6 +61,21 @@ npx sandcastle docker build-image
 6. `/harness:implement-spec #<PRD>`: builds each unblocked ticket in its own sandbox (tdd → test gate → review) and opens a PR per ticket.
 7. You review each PR: **merge** to approve (closes the ticket), or add the **`changes-requested`** label with comments to send it back. Run step 6 again to continue.
 
+## Labels
+
+| Label | On | Meaning | Created by |
+|---|---|---|---|
+| `prd` | Issue | The spec; never built directly | `setup-harness-skills` |
+| `ready-for-agent` | Issue | Ticket the build loop may build | `setup-harness-skills` |
+| `ready-for-human` | Issue | Needs a person (e.g. failed the loop) | `setup-harness-skills` |
+| `needs-triage` | Issue | Incoming, not yet evaluated | `setup-harness-skills` |
+| `needs-info` | Issue | Waiting for the reporter | `setup-harness-skills` |
+| `wontfix` | Issue | Won't be done | `setup-harness-skills` |
+| `bug` / `enhancement` | Issue | Category, set by triage | `setup-harness-skills` |
+| `changes-requested` | PR | Send the PR back to the agents for rework | `setup-build-loop` |
+
+Each ticket is built on the branch `sandcastle/issue-<n>`. In a project, `docs/agents/triage-labels.md` holds the label mapping; `gh label list` shows what exists on GitHub.
+
 ## Modifications
 
 What the harness changes compared with the original Matt Pocock and Addy Osmani files in `reference/`.
