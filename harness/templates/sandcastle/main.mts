@@ -95,13 +95,63 @@ console.log(`Rework:   ${toRework.map((t) => `#${t.id}`).join(", ") || "-"}`);
 console.log(`Waiting for human review: ${waiting.join(", ") || "-"}`);
 console.log(`Blocked:  ${blocked.join(", ") || "-"}`);
 
+// ---------- Lineage: what happened to a ticket, shown at the bottom of its PR ----------
+
+type Sandbox = Awaited<ReturnType<typeof sandcastle.createSandbox>>;
+type Step = { step: string; by: string; result: string; iterations?: number; commits?: number; seconds: number };
+
+class Lineage {
+  steps: Step[] = [];
+  private started = Date.now();
+
+  // Run an agent step and record its iterations, commits and duration.
+  async agent(sandbox: Sandbox, step: string, by: string, opts: Parameters<Sandbox["run"]>[0]) {
+    const t0 = Date.now();
+    const result = await sandbox.run(opts);
+    this.steps.push({
+      step, by,
+      result: result.completionSignal ? "done" : "stopped",
+      iterations: result.iterations.length,
+      commits: result.commits.length,
+      seconds: Math.round((Date.now() - t0) / 1000),
+    });
+    return result;
+  }
+
+  // Run the gate command and record pass/fail.
+  async gate(sandbox: Sandbox, label: string) {
+    const t0 = Date.now();
+    const result = await sandbox.exec(GATE_COMMAND);
+    this.steps.push({ step: label, by: "`typecheck` + `test`", result: result.exitCode === 0 ? "✓ pass" : "✗ fail", seconds: Math.round((Date.now() - t0) / 1000) });
+    return result;
+  }
+
+  render(title: string): string {
+    const agentRuns = this.steps.filter((s) => s.iterations !== undefined);
+    const gateFails = this.steps.filter((s) => s.result === "✗ fail").length;
+    const minutes = Math.round((Date.now() - this.started) / 60000);
+    const rows = this.steps.map((s, i) =>
+      `| ${i + 1} | ${s.step} | ${s.by} | ${s.result} | ${s.iterations ?? ""} | ${s.commits ?? ""} | ${s.seconds}s |`,
+    );
+    return [
+      `<details><summary><b>${title}</b>: ${agentRuns.length} agent runs, ${gateFails} failed gate(s), ~${minutes} min, model \`${MODEL}\`</summary>`,
+      "",
+      "| # | Step | By | Result | Iterations | Commits | Time |",
+      "|---|---|---|---|---|---|---|",
+      ...rows,
+      "",
+      "</details>",
+    ].join("\n");
+  }
+}
+
 // ---------- Building one ticket ----------
 
-async function passGate(sandbox: Awaited<ReturnType<typeof sandcastle.createSandbox>>, t: Ticket): Promise<boolean> {
-  let gate = await sandbox.exec(GATE_COMMAND);
+async function passGate(sandbox: Sandbox, t: Ticket, lineage: Lineage): Promise<boolean> {
+  let gate = await lineage.gate(sandbox, "gate");
   for (let attempt = 2; gate.exitCode !== 0 && attempt <= MAX_GATE_ATTEMPTS; attempt++) {
     console.log(`  #${t.id}: checks failed, fix attempt ${attempt}/${MAX_GATE_ATTEMPTS}`);
-    await sandbox.run({
+    await lineage.agent(sandbox, `fix (attempt ${attempt})`, "fix agent", {
       name: `fix-${t.id}-${attempt}`,
       maxIterations: 20,
       agent: agent(),
@@ -111,13 +161,13 @@ async function passGate(sandbox: Awaited<ReturnType<typeof sandcastle.createSand
         `rerun \`${GATE_COMMAND}\` until it passes, and commit. Failure output:\n\n` +
         `${gate.stdout}\n${gate.stderr}\n\nThen output <promise>COMPLETE</promise>.`,
     });
-    gate = await sandbox.exec(GATE_COMMAND);
+    gate = await lineage.gate(sandbox, "gate");
   }
   return gate.exitCode === 0;
 }
 
-async function review(sandbox: Awaited<ReturnType<typeof sandcastle.createSandbox>>, t: Ticket): Promise<boolean> {
-  await sandbox.run({
+async function review(sandbox: Sandbox, t: Ticket, lineage: Lineage): Promise<boolean> {
+  await lineage.agent(sandbox, "review", "`harness:code-review`", {
     name: `review-${t.id}`,
     maxIterations: 10,
     agent: agent(),
@@ -125,7 +175,7 @@ async function review(sandbox: Awaited<ReturnType<typeof sandcastle.createSandbo
     promptArgs: { TASK_ID: t.id, BRANCH: t.branch },
   });
   // The review may have changed code, so gate again.
-  return (await sandbox.exec(GATE_COMMAND)).exitCode === 0;
+  return (await lineage.gate(sandbox, "gate after review")).exitCode === 0;
 }
 
 function push(t: Ticket) {
@@ -133,9 +183,10 @@ function push(t: Ticket) {
 }
 
 async function buildTicket(t: Ticket): Promise<Outcome> {
+  const lineage = new Lineage();
   const sandbox = await sandcastle.createSandbox({ branch: t.branch, sandbox: docker(), hooks, copyToWorktree });
   try {
-    const implement = await sandbox.run({
+    const implement = await lineage.agent(sandbox, "implement", "`harness:tdd`", {
       name: `implement-${t.id}`,
       maxIterations: 50,
       agent: agent(),
@@ -143,11 +194,11 @@ async function buildTicket(t: Ticket): Promise<Outcome> {
       promptArgs: { TASK_ID: t.id, ISSUE_TITLE: t.title, BRANCH: t.branch },
     });
     if (implement.commits.length === 0) return { ...t, status: "failed", detail: "implementer made no commits" };
-    if (!(await passGate(sandbox, t))) return { ...t, status: "failed", detail: `checks still failing after ${MAX_GATE_ATTEMPTS} attempts` };
-    if (!(await review(sandbox, t))) return { ...t, status: "failed", detail: "checks failed after review fixes" };
+    if (!(await passGate(sandbox, t, lineage))) return { ...t, status: "failed", detail: `checks still failing after ${MAX_GATE_ATTEMPTS} attempts` };
+    if (!(await review(sandbox, t, lineage))) return { ...t, status: "failed", detail: "checks failed after review fixes" };
 
     // The agent writes the PR description to /tmp/pr-body.md inside the sandbox (not the repo).
-    await sandbox.run({
+    await lineage.agent(sandbox, "PR description", "`harness:pr`", {
       name: `pr-body-${t.id}`,
       maxIterations: 1,
       agent: agent(),
@@ -160,7 +211,7 @@ async function buildTicket(t: Ticket): Promise<Outcome> {
 
     push(t);
     const bodyFile = join(mkdtempSync(join(tmpdir(), "harness-pr-")), "body.md");
-    writeFileSync(bodyFile, `${description}\n\nCloses #${t.id}\n`);
+    writeFileSync(bodyFile, `${description}\n\nCloses #${t.id}\n\n---\n\n${lineage.render("Build lineage")}\n`);
     const url = gh("pr", "create", "--base", defaultBranch, "--head", t.branch, "--title", `#${t.id}: ${t.title}`, "--body-file", bodyFile);
     return { ...t, status: "pr-opened", detail: url };
   } finally {
@@ -169,21 +220,23 @@ async function buildTicket(t: Ticket): Promise<Outcome> {
 }
 
 async function reworkTicket(t: Ticket & { pr: OpenPr }): Promise<Outcome> {
+  const lineage = new Lineage();
   const sandbox = await sandcastle.createSandbox({ branch: t.branch, sandbox: docker(), hooks, copyToWorktree });
   try {
-    await sandbox.run({
+    await lineage.agent(sandbox, "rework from review", "rework agent + `harness:tdd`", {
       name: `rework-${t.id}`,
       maxIterations: 50,
       agent: agent(),
       promptFile: "./.sandcastle/rework-prompt.md",
       promptArgs: { TASK_ID: t.id, BRANCH: t.branch, PR_NUMBER: String(t.pr.number) },
     });
-    if (!(await passGate(sandbox, t))) return { ...t, status: "failed", detail: "checks failing after rework" };
-    if (!(await review(sandbox, t))) return { ...t, status: "failed", detail: "checks failed after review fixes" };
+    if (!(await passGate(sandbox, t, lineage))) return { ...t, status: "failed", detail: "checks failing after rework" };
+    if (!(await review(sandbox, t, lineage))) return { ...t, status: "failed", detail: "checks failed after review fixes" };
 
     push(t);
     gh("pr", "edit", String(t.pr.number), "--remove-label", CHANGES_LABEL);
-    gh("pr", "comment", String(t.pr.number), "--body", "Review feedback addressed by the ADLC harness build loop. Ready for another look.");
+    gh("pr", "comment", String(t.pr.number), "--body",
+      `Review feedback addressed by the ADLC harness build loop. Ready for another look.\n\n${lineage.render("Rework lineage")}`);
     return { ...t, status: "pr-updated", detail: t.pr.url };
   } finally {
     await sandbox.close();
