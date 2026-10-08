@@ -61,6 +61,25 @@ npx sandcastle docker build-image
 6. `/harness:implement-spec #<PRD>`: builds each unblocked ticket in its own sandbox (tdd → test gate → review) and opens a PR per ticket.
 7. You review each PR: **merge** to approve (closes the ticket), or add the **`changes-requested`** label with comments to send it back. Run step 6 again to continue.
 
+## Modifications
+
+What the harness changes compared with the original Matt Pocock and Addy Osmani files in `reference/`.
+
+**Behaviour changes**
+
+| File | Change |
+|---|---|
+| `build/implement-spec` | Fully rewritten. The original ran subagents in local git worktrees with one review at the end; this one runs the Sandcastle loop and opens one PR per ticket. |
+| `plan/to-spec` | The PRD gets the `prd` label instead of `ready-for-agent`, and the skill reports the PRD number. |
+| `plan/to-tickets` | The `Parent` link to the PRD is always required. |
+| `setup/setup-harness-skills` | Renamed from `setup-matt-pocock-skills`. The label section always runs and creates the labels on GitHub, including `prd`. |
+| `setup/setup-build-loop` | New. |
+| `templates/sandcastle/*` | New. Based on Sandcastle's `parallel-planner-with-review` template, with all prompts rewritten for the harness. |
+
+**Name changes only** (skill references updated to the `harness:` namespace, e.g. `tdd` → `harness:tdd`): `grill-with-docs`, `triage`, `implement`, `tdd`, `code-review`, and the four agents (link to Addy's agents doc only).
+
+**Unchanged:** `grilling`, `domain-modeling`, `pr`, `diagnosing-bugs`, `codebase-design`, and the content of the four agents.
+
 ## Credits
 
-The skills and agents are adapted from [mattpocock/skills](https://github.com/mattpocock/skills) and [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills), both MIT; their licences are in `reference/`. The planned checkpoint and gate loop for the build phase is inspired by Shopify's [Helix](https://shopify.engineering/helix).
+The skills and agents are adapted from [mattpocock/skills](https://github.com/mattpocock/skills) and [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills), both MIT; their licences are in `reference/`. The gated build loop is inspired by Shopify's [Helix](https://shopify.engineering/helix).
