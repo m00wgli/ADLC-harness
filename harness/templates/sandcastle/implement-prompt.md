@@ -28,6 +28,6 @@ The loop gates every ticket on `npm run typecheck` and `npm run test`. If either
 
 Commit with a message that names the ticket (`#{{TASK_ID}}`), the key decisions, and anything the next ticket should know.
 
-Do not close the issue; the merge step does that. If you cannot finish, comment on the issue with what was done and what blocks you.
+Do not push, open a PR or close the issue; the loop opens the PR, and merging it closes the issue. If you cannot finish, comment on the issue with what was done and what blocks you.
 
 Once done, output <promise>COMPLETE</promise>.

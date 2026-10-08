@@ -35,7 +35,7 @@ Copy these files from `${CLAUDE_PLUGIN_ROOT}/templates/sandcastle/` into `.sandc
 
 | Template file | Copy to |
 |---|---|
-| `main.mts`, `plan-prompt.md`, `implement-prompt.md`, `review-prompt.md`, `merge-prompt.md`, `Dockerfile` | same name |
+| `main.mts`, `implement-prompt.md`, `review-prompt.md`, `pr-prompt.md`, `rework-prompt.md`, `Dockerfile` | same name |
 | `env.example` | `.env.example` |
 | `gitignore` | `.gitignore` |
 
@@ -54,6 +54,12 @@ Never echo a token back in the conversation. Ask the user to put secrets in `.en
 Then add `GH_TOKEN` to `.sandcastle/.env` from `gh auth token`, without printing it.
 
 Confirm `.sandcastle/.env` is git-ignored: `git check-ignore .sandcastle/.env`.
+
+Create the label a reviewer uses to send a PR back to the agents:
+
+```bash
+gh label create changes-requested --color D93F0B --description "PR needs rework by the build loop" --force
+```
 
 ## 5. Build the image
 

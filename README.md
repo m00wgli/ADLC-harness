@@ -58,7 +58,8 @@ npx sandcastle docker build-image
 3. `/harness:to-spec`: publishes the PRD as a GitHub issue.
 4. `/harness:to-tickets #<PRD>`: splits the PRD into GitHub issues with blocking links.
 5. `/harness:setup-build-loop`: once per project. Sets up Sandcastle and the Docker image.
-6. `/harness:implement-spec #<PRD>`: builds the tickets in parallel sandboxes (tdd → test gate → review → merge).
+6. `/harness:implement-spec #<PRD>`: builds each unblocked ticket in its own sandbox (tdd → test gate → review) and opens a PR per ticket.
+7. You review each PR: **merge** to approve (closes the ticket), or add the **`changes-requested`** label with comments to send it back. Run step 6 again to continue.
 
 ## Credits
 
