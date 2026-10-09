@@ -6,7 +6,7 @@
     {
       "name": "harness",
       "source": "./harness",
-      "description": "Custom agent harness: plan phase and specialist review agents."
+      "description": "Agent harness: plan an idea into GitHub tickets, build them in sandboxes, review as PRs."
     }
   ]
 }
