@@ -45,6 +45,8 @@ claude plugin update harness@adlc-ae-workflow
 
 Or inside Claude Code: `/plugin` → Marketplaces → `adlc-ae-workflow` → Update. Then restart Claude Code.
 
+An install is per project **and** per scope (`local`, `project`, `user`), and each one updates separately. Run the update from the project's folder, once per scope it is installed in (`claude plugin update harness@adlc-ae-workflow --scope local`, then `--scope project`); a stale `local` install wins over a newer `project` one. `claude plugin list` shows what is active. To update once for every project, install with `--scope user` instead.
+
 Projects using the build loop also need the new harness inside their Docker image. Set `ARG HARNESS_VERSION` in `.sandcastle/Dockerfile` to the new version, then rebuild:
 
 ```bash
