@@ -86,7 +86,7 @@ What the harness changes compared with the original Matt Pocock and Addy Osmani 
 |---|---|
 | `build/implement-spec` | Fully rewritten. The original ran subagents in local git worktrees with one review at the end; this one runs the Sandcastle loop and opens one PR per ticket. |
 | `plan/to-spec` | The PRD gets the `prd` label instead of `ready-for-agent`, and the skill reports the PRD number. |
-| `plan/to-tickets` | The `Parent` link to the PRD is always required. |
+| `plan/to-tickets` | The `Parent` link to the PRD is always required. The breakdown quiz shows a layer line per ticket (`UI ✅ · API ✅ · Data ✅ · Tests ✅`) and flags cross-cutting tickets, to spot horizontal slices at a glance. |
 | `setup/setup-harness-skills` | Renamed from `setup-matt-pocock-skills`. The label section always runs and creates the labels on GitHub, including `prd`. |
 | `plan/grilling` | Asks the user first whether to be grilled **one question at a time** or **a round at a time** (the whole frontier per message, the original behaviour and the recommended default). |
 | `setup/setup-build-loop` | New. |

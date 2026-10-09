@@ -44,8 +44,11 @@ Give each ticket its **blocking edges**: the other tickets that must complete be
 Present the proposed breakdown as a numbered list. For each ticket, show:
 
 - **Title**: short descriptive name
+- **Layers**: one line showing which layers of this project's stack the slice touches, e.g. `UI ✅ · API ✅ · Data ✅ · Tests ✅` (name the layers after the project: `CLI · Core · Tests` for a CLI). Mark a skipped layer `–` with a one-line reason. Add `⚠ cross-cutting` when the ticket changes the same layer across several features: that is a horizontal slice in disguise, so split or fold it.
 - **Blocked by**: which other tickets (if any) must complete first
 - **What it delivers**: the end-to-end behaviour this ticket makes work
+
+The layer line is for the quiz only; don't add it to the published tickets.
 
 Ask the user:
 
