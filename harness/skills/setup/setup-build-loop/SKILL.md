@@ -1,12 +1,12 @@
 ---
 name: setup-build-loop
-description: "Set up this repo's build loop: install Sandcastle, copy the harness loop template into .sandcastle/, write .env, and build the Docker image. Run once per project before /harness:implement-spec."
+description: "Set up this repo's build loop: install Sandcastle, copy the harness loop template into .sandcastle/, write .env, and build the Docker image. Run once per project before /harness:build."
 disable-model-invocation: true
 ---
 
 # Setup Build Loop
 
-Prepare this repo so `/harness:implement-spec` can build tickets in parallel Docker sandboxes with [Sandcastle](https://github.com/mattpocock/sandcastle).
+Prepare this repo so `/harness:build` can build tickets in parallel Docker sandboxes with [Sandcastle](https://github.com/mattpocock/sandcastle).
 
 The template lives at `${CLAUDE_PLUGIN_ROOT}/templates/sandcastle/`.
 
@@ -96,4 +96,4 @@ Pass when it reports zero commits, the completion signal, an issue count, and th
 
 ## 7. Commit
 
-Commit `.sandcastle/` (not `.env`), `package.json` and the lockfile. Tell the user to run `/harness:implement-spec #<PRD>` to start building.
+Commit `.sandcastle/` (not `.env`), `package.json` and the lockfile. Tell the user to run `/harness:build #<PRD>` to start building.

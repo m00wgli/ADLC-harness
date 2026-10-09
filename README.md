@@ -1,17 +1,16 @@
 # ADLC-harness
 
-A custom agent harness for Claude Code, packaged as the `harness` plugin. Its skills and agents take a project from idea to GitHub tickets, and later through build and review.
+A custom agent harness for Claude Code, packaged as the `harness` plugin. Its skills take a project from idea to GitHub tickets, then build each ticket in a Docker sandbox and open a pull request for human review.
 
 ```
 harness/
 ├── .claude-plugin/plugin.json
 ├── hooks/           guard-github-edits (approval before editing GitHub text), notify-record-changes (notice on ADR/glossary changes)
-├── agents/          code-reviewer, security-auditor, test-engineer, web-performance-auditor
 ├── skills/
 │   ├── setup/       setup-harness-skills, setup-build-loop
 │   ├── intake/      triage
-│   ├── plan/        grill-with-docs, grilling, domain-modeling, to-spec, to-tickets
-│   └── build/       implement, implement-spec, tdd, code-review, pr, diagnosing-bugs, codebase-design
+│   ├── plan/        plan, grill-with-docs, grilling, domain-modeling, to-spec, to-tickets
+│   └── build/       build, implement, implement-spec, tdd, code-review, pr, diagnosing-bugs, codebase-design
 └── templates/
     └── sandcastle/  build loop copied into each project by setup-build-loop
 sandcastle/          fork of mattpocock/sandcastle (git submodule): runs the build loop in Docker sandboxes
@@ -54,13 +53,13 @@ npx sandcastle docker build-image
 
 ## Flow
 
-1. `/harness:setup-harness-skills`: once per project. Connects the GitHub issue tracker and labels.
-2. `/harness:grill-with-docs`: sharpens the idea by interview and writes `GLOSSARY.md` and ADRs.
-3. `/harness:to-spec`: publishes the PRD as a GitHub issue.
-4. `/harness:to-tickets #<PRD>`: splits the PRD into GitHub issues with blocking links.
-5. `/harness:setup-build-loop`: once per project. Sets up Sandcastle and the Docker image.
-6. `/harness:implement-spec #<PRD>`: builds each unblocked ticket in its own sandbox (tdd → test gate → review) and opens a PR per ticket.
-7. You review each PR: **merge** to approve (closes the ticket), or add the **`changes-requested`** label with comments to send it back. Run step 6 again to continue.
+Two commands, one per phase. Each walks its phase's skills in order and resumes where it left off.
+
+1. **`/harness:plan @IDEA.md`**: sets the repo up on first use, grills the idea (writing `GLOSSARY.md` and ADRs), publishes the spec as an issue labelled `prd`, and cuts it into tickets with blocking links. It stops twice for your approval: before the spec, and on the ticket breakdown.
+2. **`/harness:build #<spec>`**: sets the build loop up on first use, then builds each unblocked ticket in its own sandbox (tdd → test gate → review) and opens a PR per ticket.
+3. **You review each PR**: **merge** to approve (closes the ticket), or add the **`changes-requested`** label with comments to send it back. Run step 2 again to continue.
+
+Each step can also be run on its own: `/harness:setup-harness-skills`, `/harness:grill-with-docs`, `/harness:to-spec`, `/harness:to-tickets #<spec>`, `/harness:setup-build-loop`, `/harness:implement-spec #<spec>`.
 
 ## Labels
 
@@ -90,14 +89,17 @@ What the harness changes compared with the original Matt Pocock and Addy Osmani 
 | `plan/to-tickets` | The `Parent` link to the PRD is always required. |
 | `setup/setup-harness-skills` | Renamed from `setup-matt-pocock-skills`. The label section always runs and creates the labels on GitHub, including `prd`. |
 | `setup/setup-build-loop` | New. |
+| `plan/plan`, `build/build` | New. One entry command per phase, written in Matt Pocock's style; they sequence the existing skills and resume where the last session stopped. `build` never codes a ticket itself; everything goes through the loop. |
 | `hooks/guard-github-edits` | New. Editing or deleting existing GitHub issues (specs, tickets), PRs or comments needs explicit human approval; blocked inside build-loop sandboxes. |
 | `hooks/notify-record-changes` | New. Shows a notice whenever an agent creates, edits, overwrites or deletes an ADR or the glossary. Never blocks; the ADR and glossary flow stays as Matt designed it. In the build loop, the PR lists any ADR/glossary files it changes. |
 | `templates/sandcastle/*` | New. Based on Sandcastle's `parallel-planner-with-review` template, with all prompts rewritten for the harness. |
 
-**Name changes only** (skill references updated to the `harness:` namespace, e.g. `tdd` → `harness:tdd`): `grill-with-docs`, `triage`, `implement`, `tdd`, `code-review`, and the four agents (link to Addy's agents doc only).
+**Name changes only** (skill references updated to the `harness:` namespace, e.g. `tdd` → `harness:tdd`): `grill-with-docs`, `triage`, `implement`, `tdd`, `code-review`.
 
-**Unchanged:** `grilling`, `domain-modeling`, `pr`, `diagnosing-bugs`, `codebase-design`, and the content of the four agents.
+**Unchanged:** `grilling`, `domain-modeling`, `pr`, `diagnosing-bugs`, `codebase-design`.
+
+**Removed:** Addy Osmani's four agents (`code-reviewer`, `security-auditor`, `test-engineer`, `web-performance-auditor`). Nothing in the harness used them; they remain in `reference/addy-osmani/agents/`.
 
 ## Credits
 
-The skills and agents are adapted from [mattpocock/skills](https://github.com/mattpocock/skills) and [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills), both MIT; their licences are in `reference/`.
+The skills are adapted from [mattpocock/skills](https://github.com/mattpocock/skills) and [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills), both MIT; their licences are in `reference/`.

@@ -48,7 +48,7 @@ Until its PR is merged, all work for a ticket stays on that ticket's branch and 
    - tickets that failed, with the reason the loop printed;
    - tickets waiting on review or blocked.
 
-   Then tell the user what to do next: review the PRs, merge to approve or label `changes-requested` to send back, and run `/harness:implement-spec #<PRD>` again to continue.
+   Then tell the user what to do next: review the PRs, merge to approve or label `changes-requested` to send back, and run `/harness:build #<PRD>` again to continue.
 
 7. **Failed tickets.** Read the failing ticket's log and branch, summarise what went wrong, and offer to rerun (the loop reuses the branch) or to hand it to a human with the `ready-for-human` label.
 
