@@ -1,7 +1,7 @@
 {
   "name": "harness",
   "displayName": "AE Harness",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Custom agent harness: plan phase (grill, PRD, tickets on GitHub) and specialist review agents.",
   "author": { "name": "Dean Terneu" },
   "skills": ["./skills/setup/", "./skills/plan/", "./skills/intake/", "./skills/build/"]

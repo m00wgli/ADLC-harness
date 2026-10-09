@@ -21,8 +21,6 @@ For each piece of feedback:
 
 Run `npm run typecheck` and `npm run test`, then commit with a message naming #{{TASK_ID}} and the feedback addressed.
 
-Do not edit existing ADRs or glossary entries. If the feedback contradicts one, say so in your reply on the PR so a human can decide.
-
 Do not push, merge or close anything; the loop does that.
 
 Once done, output <promise>COMPLETE</promise>.

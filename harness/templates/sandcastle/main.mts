@@ -178,6 +178,22 @@ async function review(sandbox: Sandbox, t: Ticket, lineage: Lineage): Promise<bo
   return (await lineage.gate(sandbox, "gate after review")).exitCode === 0;
 }
 
+// ADRs and the glossary are shared records: list any the branch changes so the reviewer sees them.
+async function recordChanges(sandbox: Sandbox): Promise<string> {
+  const diff = await sandbox.exec(`git diff --name-status ${defaultBranch}...HEAD`);
+  const files = diff.stdout
+    .split("\n")
+    .filter((line) => /(docs\/adr\/|GLOSSARY(-MAP)?\.md)/i.test(line))
+    .map((line) => {
+      const [status, ...path] = line.trim().split(/\s+/);
+      const what = status?.startsWith("A") ? "added" : status?.startsWith("D") ? "deleted" : "changed";
+      return `- ${what}: \`${path.join(" ")}\``;
+    });
+  return files.length
+    ? `### 📝 ADRs / glossary touched\n\nThis PR changes shared records; check these carefully.\n\n${files.join("\n")}\n\n`
+    : "";
+}
+
 function push(t: Ticket) {
   sh("git", ["push", "--force-with-lease", "-u", "origin", t.branch]);
 }
@@ -211,7 +227,8 @@ async function buildTicket(t: Ticket): Promise<Outcome> {
 
     push(t);
     const bodyFile = join(mkdtempSync(join(tmpdir(), "harness-pr-")), "body.md");
-    writeFileSync(bodyFile, `${description}\n\nCloses #${t.id}\n\n---\n\n${lineage.render("Build lineage")}\n`);
+    const records = await recordChanges(sandbox);
+    writeFileSync(bodyFile, `${description}\n\nCloses #${t.id}\n\n---\n\n${records}${lineage.render("Build lineage")}\n`);
     const url = gh("pr", "create", "--base", defaultBranch, "--head", t.branch, "--title", `#${t.id}: ${t.title}`, "--body-file", bodyFile);
     return { ...t, status: "pr-opened", detail: url };
   } finally {
@@ -233,10 +250,11 @@ async function reworkTicket(t: Ticket & { pr: OpenPr }): Promise<Outcome> {
     if (!(await passGate(sandbox, t, lineage))) return { ...t, status: "failed", detail: "checks failing after rework" };
     if (!(await review(sandbox, t, lineage))) return { ...t, status: "failed", detail: "checks failed after review fixes" };
 
+    const records = await recordChanges(sandbox);
     push(t);
     gh("pr", "edit", String(t.pr.number), "--remove-label", CHANGES_LABEL);
     gh("pr", "comment", String(t.pr.number), "--body",
-      `Review feedback addressed by the ADLC harness build loop. Ready for another look.\n\n${lineage.render("Rework lineage")}`);
+      `Review feedback addressed by the ADLC harness build loop. Ready for another look.\n\n${records}${lineage.render("Rework lineage")}`);
     return { ...t, status: "pr-updated", detail: t.pr.url };
   } finally {
     await sandbox.close();
