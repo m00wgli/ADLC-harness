@@ -55,7 +55,7 @@ npx sandcastle docker build-image
 
 Two commands, one per phase. Each walks its phase's skills in order and resumes where it left off.
 
-1. **`/harness:plan @IDEA.md`**: sets the repo up on first use, grills the idea (writing `GLOSSARY.md` and ADRs), publishes the spec as an issue labelled `prd`, and cuts it into tickets with blocking links. It stops twice for your approval: before the spec, and on the ticket breakdown.
+1. **`/harness:plan <input>`**: takes any input (text, a brainstorm, `@file`, `@folder`, a SoW or RFP, a URL or `#issue`), sets the repo up on first use, reads the sources into a short brief, grills what they leave open (writing `GLOSSARY.md` and ADRs), publishes the spec as an issue labelled `prd`, and cuts it into tickets with blocking links. It stops twice for your approval: before the spec, and on the ticket breakdown.
 2. **`/harness:build #<spec>`**: sets the build loop up on first use, then builds each unblocked ticket in its own sandbox (tdd → test gate → review) and opens a PR per ticket.
 3. **You review each PR**: **merge** to approve (closes the ticket), or add the **`changes-requested`** label with comments to send it back. Run step 2 again to continue.
 
