@@ -14,7 +14,7 @@ You have been given a spec (a PRD issue) whose tickets describe how to implement
 | Ticket state | What the loop does |
 |---|---|
 | Unblocked, no PR yet | Builds it in its own sandbox on `sandcastle/issue-<n>` with `harness:tdd`, then runs the **gate**: `npm run typecheck` and `npm run test`, with up to 3 fix attempts. Then `harness:code-review` and fixes, the gate again, a PR description via `harness:pr`, push, and a **PR with `Closes #<n>`**. |
-| Has a PR labelled `changes-requested` | **Reworks** it from the PR's review comments, gates and reviews it again, pushes to the same PR, and removes the label. General lessons go into `LEARNINGS.md`. |
+| Has a PR labelled `changes-requested` | **Reworks** it from the PR's review comments, gates and reviews it again, pushes to the same PR, and removes the label. |
 | Has an open PR without that label | Waits for human review and skips it. |
 | Blocked by an open ticket | Skips it until its blockers are merged. |
 

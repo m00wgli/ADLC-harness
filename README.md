@@ -5,7 +5,7 @@ A custom agent harness for Claude Code, packaged as the `harness` plugin. Its sk
 ```
 harness/
 ├── .claude-plugin/plugin.json
-├── hooks/           guard-github-edits (approval before editing existing GitHub text)
+├── hooks/           guard-edits (approval before changing existing specs, tickets, PRs, comments, ADRs, glossary)
 ├── agents/          code-reviewer, security-auditor, test-engineer, web-performance-auditor
 ├── skills/
 │   ├── setup/       setup-harness-skills, setup-build-loop
@@ -90,7 +90,7 @@ What the harness changes compared with the original Matt Pocock and Addy Osmani 
 | `plan/to-tickets` | The `Parent` link to the PRD is always required. |
 | `setup/setup-harness-skills` | Renamed from `setup-matt-pocock-skills`. The label section always runs and creates the labels on GitHub, including `prd`. |
 | `setup/setup-build-loop` | New. |
-| `hooks/guard-github-edits` | New. Editing or deleting existing GitHub issues, PRs or comments needs explicit human approval; inside build-loop sandboxes it is blocked. |
+| `hooks/guard-edits` | New. Changing or deleting existing GitHub issues (specs, tickets), PRs, comments, ADRs or glossary entries needs explicit human approval; adding new ones is free. Inside build-loop sandboxes it is blocked. |
 | `templates/sandcastle/*` | New. Based on Sandcastle's `parallel-planner-with-review` template, with all prompts rewritten for the harness. |
 
 **Name changes only** (skill references updated to the `harness:` namespace, e.g. `tdd` → `harness:tdd`): `grill-with-docs`, `triage`, `implement`, `tdd`, `code-review`, and the four agents (link to Addy's agents doc only).
@@ -99,4 +99,4 @@ What the harness changes compared with the original Matt Pocock and Addy Osmani 
 
 ## Credits
 
-The skills and agents are adapted from [mattpocock/skills](https://github.com/mattpocock/skills) and [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills), both MIT; their licences are in `reference/`. The gated build loop is inspired by Shopify's [Helix](https://shopify.engineering/helix).
+The skills and agents are adapted from [mattpocock/skills](https://github.com/mattpocock/skills) and [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills), both MIT; their licences are in `reference/`.

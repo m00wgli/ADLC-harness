@@ -10,7 +10,7 @@ Read all of it:
 - `gh api repos/{owner}/{repo}/pulls/{{PR_NUMBER}}/comments` (line comments)
 - `gh api repos/{owner}/{repo}/pulls/{{PR_NUMBER}}/reviews`
 
-Also read the ticket (`gh issue view {{TASK_ID}}`), `GLOSSARY.md`, `docs/adr/` and `LEARNINGS.md` if it exists.
+Also read the ticket (`gh issue view {{TASK_ID}}`), `GLOSSARY.md` and `docs/adr/`.
 
 # EXECUTION
 
@@ -21,9 +21,7 @@ For each piece of feedback:
 
 Run `npm run typecheck` and `npm run test`, then commit with a message naming #{{TASK_ID}} and the feedback addressed.
 
-# LEARNINGS
-
-If the feedback teaches something general about this project (a convention, a preference, a mistake to avoid next time), append one line per lesson to `LEARNINGS.md` at the repo root, and commit it. Every future agent reads this file.
+Do not edit existing ADRs or glossary entries. If the feedback contradicts one, say so in your reply on the PR so a human can decide.
 
 Do not push, merge or close anything; the loop does that.
 

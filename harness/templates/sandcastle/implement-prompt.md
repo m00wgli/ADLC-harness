@@ -12,7 +12,6 @@ Read before writing code:
 
 - `GLOSSARY.md`: use these terms in code, tests and commit messages.
 - `docs/adr/`: decisions you must respect.
-- `LEARNINGS.md`, if it exists: feedback from earlier human reviews.
 
 Recent commits:
 
