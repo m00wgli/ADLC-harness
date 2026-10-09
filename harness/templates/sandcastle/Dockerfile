@@ -33,7 +33,7 @@ ENV PATH="/home/agent/.local/bin:$PATH"
 
 # Install the ADLC harness plugin so agents in the sandbox have its skills and agents.
 # Bump HARNESS_VERSION to the new plugin version to pull a newer harness on the next build.
-ARG HARNESS_VERSION=0.4.4
+ARG HARNESS_VERSION=0.4.5
 RUN echo "harness ${HARNESS_VERSION}" \
   && claude plugin marketplace add m00wgli/ADLC-harness \
   && claude plugin install harness@adlc-ae-workflow

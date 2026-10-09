@@ -9,7 +9,7 @@ harness/
 ├── skills/
 │   ├── setup/       setup-harness-skills, setup-build-loop
 │   ├── intake/      triage
-│   ├── plan/        plan, grill-with-docs, grilling, domain-modeling, to-spec, to-tickets
+│   ├── plan/        plan, grill-with-docs, grilling, domain-modeling, research, prototype, to-spec, to-tickets
 │   └── build/       build, implement, implement-spec, tdd, code-review, pr, diagnosing-bugs, codebase-design
 └── templates/
     └── sandcastle/  build loop copied into each project by setup-build-loop
@@ -97,7 +97,7 @@ What the harness changes compared with the original Matt Pocock and Addy Osmani 
 
 **Name changes only** (skill references updated to the `harness:` namespace, e.g. `tdd` → `harness:tdd`): `grill-with-docs`, `triage`, `implement`, `tdd`, `code-review`.
 
-**Unchanged:** `domain-modeling`, `pr`, `diagnosing-bugs`, `codebase-design`.
+**Unchanged:** `domain-modeling`, `research`, `prototype`, `pr`, `diagnosing-bugs`, `codebase-design`.
 
 **Removed:** Addy Osmani's four agents (`code-reviewer`, `security-auditor`, `test-engineer`, `web-performance-auditor`). Nothing in the harness used them; they remain in `reference/addy-osmani/agents/`.
 

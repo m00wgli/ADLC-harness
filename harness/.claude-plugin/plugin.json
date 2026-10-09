@@ -1,7 +1,7 @@
 {
   "name": "harness",
   "displayName": "AE Harness",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "description": "Agent harness: /harness:plan takes an idea to a spec and GitHub tickets; /harness:build builds each ticket in a Docker sandbox and opens a PR for human review.",
   "author": { "name": "Dean Terneu" },
   "skills": ["./skills/setup/", "./skills/plan/", "./skills/intake/", "./skills/build/"]
