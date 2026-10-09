@@ -88,6 +88,7 @@ What the harness changes compared with the original Matt Pocock and Addy Osmani 
 | `plan/to-spec` | The PRD gets the `prd` label instead of `ready-for-agent`, and the skill reports the PRD number. |
 | `plan/to-tickets` | The `Parent` link to the PRD is always required. |
 | `setup/setup-harness-skills` | Renamed from `setup-matt-pocock-skills`. The label section always runs and creates the labels on GitHub, including `prd`. |
+| `plan/grilling` | Asks the user first whether to be grilled **one question at a time** or **a round at a time** (the whole frontier per message, the original behaviour and the recommended default). |
 | `setup/setup-build-loop` | New. |
 | `plan/plan`, `build/build` | New. One entry command per phase, written in Matt Pocock's style; they sequence the existing skills and resume where the last session stopped. `build` never codes a ticket itself; everything goes through the loop. |
 | `hooks/guard-github-edits` | New. Editing or deleting existing GitHub issues (specs, tickets), PRs or comments needs explicit human approval; blocked inside build-loop sandboxes. |
@@ -96,7 +97,7 @@ What the harness changes compared with the original Matt Pocock and Addy Osmani 
 
 **Name changes only** (skill references updated to the `harness:` namespace, e.g. `tdd` → `harness:tdd`): `grill-with-docs`, `triage`, `implement`, `tdd`, `code-review`.
 
-**Unchanged:** `grilling`, `domain-modeling`, `pr`, `diagnosing-bugs`, `codebase-design`.
+**Unchanged:** `domain-modeling`, `pr`, `diagnosing-bugs`, `codebase-design`.
 
 **Removed:** Addy Osmani's four agents (`code-reviewer`, `security-auditor`, `test-engineer`, `web-performance-auditor`). Nothing in the harness used them; they remain in `reference/addy-osmani/agents/`.
 
