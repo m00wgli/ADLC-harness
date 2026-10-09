@@ -20,9 +20,24 @@ All ticket code goes through the loop, never through this session. The loop is w
 - No `docs/agents/issue-tracker.md`, or no open issue labelled `prd` → there's nothing to build yet. Tell the user to run `/harness:plan` and stop.
 - No spec number in the arguments → use the open `prd` issue if there is exactly one; ask if there are several.
 - The spec has no tickets naming it as parent → tell the user to run `/harness:plan` to cut them, and stop.
-- No `.sandcastle/main.mts` → the loop isn't set up. Read [setup-build-loop](${CLAUDE_PLUGIN_ROOT}/skills/setup/setup-build-loop/SKILL.md) and follow it first.
+### 2. Check the sandbox is ready
 
-### 2. Show the frontier
+The loop fails late and expensively when its setup is incomplete, so check every part before starting it. Never print a token while checking.
+
+| Check | How | If it fails |
+|---|---|---|
+| Loop installed | `.sandcastle/main.mts` exists | Set up the loop (below) |
+| Loop current | `ARG HARNESS_VERSION` in `.sandcastle/Dockerfile` equals `version` in `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json` | Set up the loop again: it replaces the template, keeps `.env`, rebuilds the image |
+| Credentials | `.sandcastle/.env` sets `GH_TOKEN` and one of `CLAUDE_CODE_OAUTH_TOKEN`, `ANTHROPIC_API_KEY` or `ANTHROPIC_BASE_URL` + `ANTHROPIC_AUTH_TOKEN` (check the keys have values, don't show them) | Ask the user to fill them in, as in the setup's step 4 |
+| Packages | `node_modules/@ai-hero/sandcastle` exists | `npm install` |
+| Docker | `docker version --format '{{.Server.Version}}'` prints a version | Ask the user to start Docker Desktop, then check again |
+| Image | `docker image inspect sandcastle:<repo folder name>` succeeds | `npx sandcastle docker build-image` |
+
+**Set up the loop** means: read [setup-build-loop](${CLAUDE_PLUGIN_ROOT}/skills/setup/setup-build-loop/SKILL.md) and follow it.
+
+Report the result as one line per check. Continue only when every check passes.
+
+### 3. Show the frontier
 
 List the spec's tickets **by name**, each with its state:
 
@@ -34,11 +49,11 @@ List the spec's tickets **by name**, each with its state:
 
 If nothing is ready or sent back, say what the user is waiting on (usually PRs to review) and stop.
 
-### 3. Run the loop
+### 4. Run the loop
 
 Read [implement-spec](${CLAUDE_PLUGIN_ROOT}/skills/build/implement-spec/SKILL.md) and follow it for the spec's number.
 
-### 4. Hand back
+### 5. Hand back
 
 When the loop ends, report the PRs it opened or updated, and any ticket that failed with its reason. Then tell the user the review rules:
 

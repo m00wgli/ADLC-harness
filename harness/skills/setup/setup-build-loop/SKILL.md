@@ -29,7 +29,7 @@ If `scripts.test` in `package.json` is npm's placeholder (`echo "Error: no test 
 
 ## 3. Copy the template
 
-If `.sandcastle/` already exists, keep its `.env` and ask the user before replacing the other files.
+If `.sandcastle/` already exists, keep its `.env`, note the `MODEL` value in the old `main.mts`, and ask the user before replacing the other files. Put the same `MODEL` back into the new `main.mts`, so an update doesn't change how the sandboxes reach Claude.
 
 Copy these files from `${CLAUDE_PLUGIN_ROOT}/templates/sandcastle/` into `.sandcastle/`:
 

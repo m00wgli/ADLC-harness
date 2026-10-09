@@ -36,7 +36,7 @@ Or install it in another project:
 
 ## Update
 
-After a new version is pushed (bump `version` in `harness/.claude-plugin/plugin.json`, or the update is skipped):
+After a new version is pushed (bump `version` in `harness/.claude-plugin/plugin.json` **and** `ARG HARNESS_VERSION` in `harness/templates/sandcastle/Dockerfile` to the same value; `/harness:build` compares them to spot an outdated loop):
 
 ```bash
 claude plugin marketplace update adlc-ae-workflow
