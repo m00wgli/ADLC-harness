@@ -7,7 +7,7 @@ harness/
 ├── .claude-plugin/plugin.json
 ├── hooks/           guard-github-edits (approval before editing GitHub text), notify-record-changes (notice on ADR/glossary changes)
 ├── skills/
-│   ├── setup/       setup-harness-skills, setup-build-loop
+│   ├── setup/       setup-harness-skills, setup-build-loop, setup-preview-deploys
 │   ├── intake/      triage
 │   ├── plan/        plan, grill-with-docs, grilling, domain-modeling, research, prototype, to-spec, to-tickets
 │   └── build/       build, implement, implement-spec, tdd, code-review, pr, diagnosing-bugs, codebase-design
@@ -61,7 +61,7 @@ Two commands, one per phase. Each walks its phase's skills in order and resumes 
 2. **`/harness:build #<spec>`**: sets the build loop up on first use, then builds each unblocked ticket in its own sandbox (tdd → test gate → review) and opens a PR per ticket.
 3. **You review each PR**: **merge** to approve (closes the ticket), or add the **`changes-requested`** label with comments to send it back. Run step 2 again to continue.
 
-Each step can also be run on its own: `/harness:setup-harness-skills`, `/harness:grill-with-docs`, `/harness:to-spec`, `/harness:to-tickets #<spec>`, `/harness:setup-build-loop`, `/harness:implement-spec #<spec>`.
+Each step can also be run on its own: `/harness:setup-harness-skills`, `/harness:grill-with-docs`, `/harness:to-spec`, `/harness:to-tickets #<spec>`, `/harness:setup-build-loop`, `/harness:setup-preview-deploys`, `/harness:implement-spec #<spec>`.
 
 ## Labels
 
@@ -91,7 +91,7 @@ What the harness changes compared with the original Matt Pocock and Addy Osmani 
 | `plan/to-tickets` | The `Parent` link to the PRD is always required. The breakdown quiz shows a layer line per ticket (`UI ✅ · API ✅ · Data ✅ · Tests ✅`) and flags cross-cutting tickets, to spot horizontal slices at a glance. |
 | `setup/setup-harness-skills` | Renamed from `setup-matt-pocock-skills`. The label section always runs and creates the labels on GitHub, including `prd`. |
 | `plan/grilling` | Asks the user first whether to be grilled **one question at a time** or **a round at a time** (the whole frontier per message, the original behaviour and the recommended default). |
-| `setup/setup-build-loop` | New. |
+| `setup/setup-build-loop`, `setup/setup-preview-deploys` | New. |
 | `plan/plan`, `build/build` | New. One entry command per phase, written in Matt Pocock's style; they sequence the existing skills and resume where the last session stopped. `build` never codes a ticket itself; everything goes through the loop. |
 | `hooks/guard-github-edits` | New. Editing or deleting existing GitHub issues (specs, tickets), PRs or comments needs explicit human approval; blocked inside build-loop sandboxes. |
 | `hooks/notify-record-changes` | New. Shows a notice whenever an agent creates, edits, overwrites or deletes an ADR or the glossary. Never blocks; the ADR and glossary flow stays as Matt designed it. In the build loop, the PR lists any ADR/glossary files it changes. |
