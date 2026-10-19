@@ -56,6 +56,23 @@ Do NOT include specific file paths or code snippets. They may end up being outda
 
 Exception: if a prototype produced a snippet that encodes a decision more precisely than prose can (state machine, reducer, schema, type shape), inline it within the relevant decision and note briefly that it came from a prototype. Trim to the decision-rich parts, not a working demo, just the important bits.
 
+## Security Requirements
+
+ASVS requirements applicable to this feature, derived from the security grilling (step 4 of `/harness:plan`). If no ASVS level is set, note that and skip this section.
+
+List every requirement confirmed as "Yes" in step 4 of `/harness:plan`. For each:
+
+- **Req ID** (e.g. V6.1.1)
+- **Chapter** (e.g. Authentication)
+- **Requirement** (the full description from the ASVS standard)
+- **How it applies** (one line: what this means concretely for this feature)
+
+Group by chapter. End the section with a count line: **Total: X requirements across Y chapters (ASVS [level]).**
+
+This count must match the count from the plan's step 4c. If it doesn't, requirements were lost — reconcile before publishing the spec.
+
+These requirements flow into ticket acceptance criteria and become verification checkboxes during the build phase.
+
 ## Testing Decisions
 
 A list of testing decisions that were made. Include:
@@ -63,6 +80,7 @@ A list of testing decisions that were made. Include:
 - A description of what makes a good test (only test external behavior, not implementation details)
 - Which modules will be tested
 - Prior art for the tests (i.e. similar types of tests in the codebase)
+- Security test cases for the ASVS requirements listed above (where automatable)
 
 ## Out of Scope
 

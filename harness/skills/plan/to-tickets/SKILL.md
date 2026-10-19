@@ -32,6 +32,7 @@ Break the work into **tracer bullet** tickets.
 - A completed slice is demoable or verifiable on its own
 - Each slice is sized to fit in a single fresh context window
 - Any prefactoring should be done first
+- If the spec has a **Security Requirements** section, distribute **all** ASVS requirements from it across the tickets. Each ASVS requirement becomes an acceptance criterion on the ticket whose vertical slice implements the relevant behaviour. A requirement that spans multiple slices goes on the earliest ticket that can verify it. **Every requirement must land on exactly one ticket.** After distribution, count the total ASVS criteria across all tickets and verify it matches the spec's total. If they don't match, requirements were lost — reconcile before publishing.
 
 </vertical-slice-rules>
 
@@ -82,6 +83,13 @@ Do NOT close or modify any parent issue.
 - [ ] Acceptance criterion 1
 - [ ] Acceptance criterion 2
 
+### Security (ASVS)
+
+- [ ] `V6.1.1` — <short description of what this requirement means for this ticket>
+- [ ] `V1.2.3` — <…>
+
+_(Only present when the spec has Security Requirements that apply to this ticket's slice. Omit the section entirely when none apply.)_
+
 </local-ticket-template>
 
 <issue-template>
@@ -98,6 +106,13 @@ The end-to-end behaviour this ticket makes work, from the user's perspective, no
 
 - [ ] Criterion 1
 - [ ] Criterion 2
+
+## Security (ASVS)
+
+- [ ] `V6.1.1` — <short description of what this requirement means for this ticket>
+- [ ] `V1.2.3` — <…>
+
+_(Only present when the spec has Security Requirements that apply to this ticket's slice. Omit the section entirely when none apply.)_
 
 ## Blocked by
 

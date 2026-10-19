@@ -1,6 +1,6 @@
 ---
 name: setup-harness-skills
-description: "Configure this repo for the engineering skills: set up its issue tracker, triage label vocabulary, and domain doc layout. Run once before first use of the other engineering skills."
+description: "Configure this repo for the engineering skills: set up its issue tracker, triage labels, domain docs, ASVS security level, and optional preview deploys. Run once before first use of the other engineering skills."
 disable-model-invocation: true
 ---
 
@@ -11,6 +11,8 @@ Scaffold the per-repo configuration that the engineering skills assume:
 - **Issue tracker**: where issues live (GitHub by default; local markdown is also supported out of the box)
 - **Triage labels**: the strings used for the five canonical triage roles
 - **Domain docs**: where `GLOSSARY.md` and ADRs live, and the consumer rules for reading them
+- **Security level**: OWASP ASVS level and applicable chapters
+- **Preview deploys** (optional): PR preview URLs via Vercel
 
 This is a prompt-driven skill, not a deterministic script. Explore, present what you found, confirm with the user, then write.
 
@@ -27,6 +29,7 @@ Look at the current repo to understand its starting state. Read whatever exists;
 - `docs/agents/`: does this skill's prior output already exist?
 - `.scratch/`: a sign that a local-markdown issue tracker convention is already in use
 - Monorepo signals: a `pnpm-workspace.yaml`, a `workspaces` field in `package.json`, or a populated `packages/*` with its own `src/`. These are present only in a genuinely large multi-package repo; their absence means single-context, which is almost every repo.
+- Security signals: existing security configuration (CSP headers, auth middleware, `.env` files with secret names), compliance docs, and whether the app handles authentication, user data, payments, or PII.
 
 ### 2. Present findings and ask
 
@@ -59,12 +62,37 @@ The defaults are the five canonical roles, each label string equal to its name: 
 
 Offer **multi-context** (a root `GLOSSARY-MAP.md` pointing to per-context `GLOSSARY.md` files) only when exploration found monorepo signals. Then confirm which layout they want.
 
+**Section D: Security level.** Ask:
+
+> Do you want to target an OWASP ASVS security level? (recommended: **L1** for most projects)
+>
+> - **L1 (Basic):** 70 requirements. Minimum for all applications. Largely automatable.
+> - **L2 (Standard):** 183 requirements (includes L1). For apps handling sensitive data, auth, transactions.
+> - **L3 (Advanced):** 345 requirements (includes L1 + L2). For critical infrastructure, financial, healthcare.
+> - **None:** no ASVS compliance tracking. The existing security-and-hardening practices still apply, but no structured ASVS checklist is generated during planning.
+
+On **None**, skip the chapter selection, write `docs/agents/security-level.md` with `Level: none`, and move on. Downstream skills will see `none` and skip ASVS-specific steps.
+
+On **L1/L2/L3**, present the 17 ASVS chapters as a checklist. Pre-check chapters based on what Section D revealed: if there is no frontend, uncheck V3 (Web Frontend Security) and V17 (WebRTC); if there is no file upload, uncheck V5 (File Handling); if there is no OAuth, uncheck V10 (OAuth and OIDC). Chapters that almost always apply are pre-checked: V1, V2, V13, V14, V15, V16. The user checks or unchecks each chapter — they own the final selection.
+
+Record in `docs/agents/security-level.md` using the template at [security-level.md](./security-level.md). The ASVS reference data lives at `${CLAUDE_PLUGIN_ROOT}/references/asvs/asvs-5.0.0.flat.json` (345 requirements, OWASP ASVS 5.0.0).
+
+**Section E: Preview deploys (optional).** Not every project deploys, and not every deployment needs previews.
+
+> Do you want PR preview deploys? (recommended: **skip for now**)
+>
+> - **Vercel**: every PR gets a preview URL
+> - **Other**: describe your preview workflow
+> - **Skip**: set up later with `/harness:setup-preview-deploys`
+
+On **Vercel**, read [setup-preview-deploys](${CLAUDE_PLUGIN_ROOT}/skills/setup/setup-preview-deploys/SKILL.md) and follow it. On **skip**, move on; the user can always run `/harness:setup-preview-deploys` later.
+
 ### 3. Confirm and edit
 
 Show the user a draft of:
 
 - The `## Agent skills` block to add to whichever of `CLAUDE.md` / `AGENTS.md` is being edited (see step 4 for selection rules)
-- The contents of `docs/agents/issue-tracker.md`, `docs/agents/domain.md`, and `docs/agents/triage-labels.md`
+- The contents of `docs/agents/issue-tracker.md`, `docs/agents/domain.md`, `docs/agents/triage-labels.md`, and `docs/agents/security-level.md`
 
 Let them edit before writing.
 
@@ -96,6 +124,10 @@ The block:
 ### Domain docs
 
 [one-line summary of layout: "single-context" or "multi-context"]. See `docs/agents/domain.md`.
+
+### Security level
+
+ASVS [L1/L2/L3] with [N] applicable chapters ([count] requirements). See `docs/agents/security-level.md`.
 ```
 
 Always include the `### Triage labels` sub-block and write `docs/agents/triage-labels.md`.
@@ -107,6 +139,7 @@ Then write the docs files using the seed templates in this skill folder as a sta
 - [issue-tracker-local.md](./issue-tracker-local.md): local-markdown issue tracker
 - [triage-labels.md](./triage-labels.md): label mapping
 - [domain.md](./domain.md): domain doc consumer rules + layout
+- [security-level.md](./security-level.md): ASVS level, applicable chapters, and reference data pointer
 
 For "other" issue trackers, write `docs/agents/issue-tracker.md` from scratch using the user's description.
 
@@ -120,7 +153,8 @@ gh label create ready-for-human --color 1D76DB --description "Requires human imp
 gh label create wontfix         --color FFFFFF --description "Will not be actioned" --force
 gh label create prd             --color 5319E7 --description "Product requirements document; parent of tickets" --force
 gh label create bug             --color D73A4A --description "Something is broken" --force
-gh label create enhancement     --color A2EEEF --description "New feature or improvement" --force
+gh label create enhancement         --color A2EEEF --description "New feature or improvement" --force
+gh label create changes-requested   --color D93F0B --description "PR needs rework by the build loop" --force
 ```
 
 Use the user's override strings if Section B collected any. For GitLab, use `glab label create` with the same names. For local markdown, skip this step. Then list the labels (`gh label list`) and confirm each one exists.

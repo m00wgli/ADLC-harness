@@ -1,6 +1,6 @@
 ---
 name: implement-spec
-description: "Implement the result of /harness:to-spec and /harness:to-tickets by running the Sandcastle build loop: each unblocked ticket is built test-first in its own Docker sandbox, gated on the project's checks and a code review, and opened as a pull request for human review."
+description: "Implement the result of /harness:to-spec and /harness:to-tickets: each unblocked ticket is built test-first on its own branch, gated on the project's checks and a code review, and opened as a pull request for human review."
 argument-hint: "#<PRD issue number>"
 disable-model-invocation: true
 ---
@@ -9,11 +9,11 @@ You have been given a spec (a PRD issue) whose tickets describe how to implement
 
 ## How the loop works
 
-`.sandcastle/main.mts` makes one pass over the PRD's open `ready-for-agent` tickets. It picks tickets in plain code, not by asking an agent:
+One pass over the PRD's open `ready-for-agent` tickets:
 
 | Ticket state | What the loop does |
 |---|---|
-| Unblocked, no PR yet | Builds it in its own sandbox on `sandcastle/issue-<n>` with `harness:tdd`, then runs the **gate**: `npm run typecheck` and `npm run test`, with up to 3 fix attempts. Then `harness:code-review` and fixes, the gate again, a PR description via `harness:pr`, push, and a **PR with `Closes #<n>`**. |
+| Unblocked, no PR yet | Builds it on its own branch with `harness:tdd`, then runs the **gate**: the project's typecheck and tests. Then `harness:code-review` and fixes, the gate again, a PR description via `harness:pr`, push, and a **PR with `Closes #<n>`**. |
 | Has a PR labelled `changes-requested` | **Reworks** it from the PR's review comments, gates and reviews it again, pushes to the same PR, and removes the label. |
 | Has an open PR without that label | Waits for human review and skips it. |
 | Blocked by an open ticket | Skips it until its blockers are merged. |
@@ -27,29 +27,33 @@ Until its PR is merged, all work for a ticket stays on that ticket's branch and 
 
 ## Steps
 
-1. **Check setup.** `.sandcastle/main.mts` must exist and Docker must be running (`docker version`). If either is missing, tell the user to run `/harness:setup-build-loop` and stop.
+1. **Read the spec.** Get the PRD number from the arguments; ask if none was given. Read it with `gh issue view <n>`. List its tickets (open `ready-for-agent` issues that name it as parent). For each one, show whether it is unblocked, blocked, or already has a PR. Read blockers from GitHub's native dependencies, `gh api repos/{owner}/{repo}/issues/<n> --jq .issue_dependencies_summary.blocked_by` (open blockers), plus the ticket's `## Blocked by` section; `gh issue view --json` does not show them. The PRD must carry the `prd` label, not `ready-for-agent`.
 
 2. **Start from an up-to-date default branch.** Check out the default branch (usually `main`), `git pull`, and make sure `git status` is clean. Ticket branches are cut from it, so merged tickets must be in it.
 
-3. **Read the spec.** Get the PRD number from the arguments; ask if none was given. Read it with `gh issue view <n>`. List its tickets (open `ready-for-agent` issues that name it as parent). For each one, show whether it is unblocked, blocked, or already has a PR. Read blockers from GitHub's native dependencies, `gh api repos/{owner}/{repo}/issues/<n> --jq .issue_dependencies_summary.blocked_by` (open blockers), plus the ticket's `## Blocked by` section; `gh issue view --json` does not show them. The PRD must carry the `prd` label, not `ready-for-agent`.
+3. **For each ready ticket**, spawn a sub-agent that:
+   - Creates (or reuses) the branch `build/issue-<n>` from the default branch.
+   - Reads the ticket (`gh issue view <n> --comments`), the parent PRD, `GLOSSARY.md`, and `docs/adr/`.
+   - Calls `harness:tdd` and follows it: one failing test, then just enough code to pass, repeat until the acceptance criteria are met.
+   - Runs the gate: `npm run --if-present typecheck && npm run --if-present test`. On failure, fix and retry up to 3 times.
+   - Calls `harness:code-review` against the default branch. Fixes real findings. Runs the gate again.
+   - Commits with a message naming the ticket (`#<n>`).
+   - Pushes with `git push -u origin build/issue-<n>`.
+   - Opens a PR: `gh pr create --base <default-branch> --head build/issue-<n> --title "#<n>: <title>"` with `Closes #<n>` in the body.
 
-4. **Run the loop in the background:**
+4. **For each ticket sent back** (PR labelled `changes-requested`):
+   - Check out the existing branch.
+   - Read the PR's review comments (`gh pr view`, `gh api repos/{owner}/{repo}/pulls/<pr>/comments`, `gh api repos/{owner}/{repo}/pulls/<pr>/reviews`).
+   - Address each piece of feedback. Use `harness:tdd` for behaviour changes.
+   - Run the gate, then `harness:code-review`, then the gate again.
+   - Push to the same branch and remove the `changes-requested` label.
+   - Comment on the PR that feedback has been addressed.
 
-   ```bash
-   npx tsx .sandcastle/main.mts <PRD number>
-   ```
-
-   It prints what it will build, rework, skip and why. Each sandbox prints its log path under `.sandcastle/logs/`.
-
-5. **Monitor.** Follow progress from the loop's output and logs, not by reading the sandboxes' code.
-
-6. **When it ends**, report:
+5. **When the pass ends**, report:
    - PRs opened or updated, with links;
-   - tickets that failed, with the reason the loop printed;
+   - tickets that failed, with the reason;
    - tickets waiting on review or blocked.
 
    Then tell the user what to do next: review the PRs, merge to approve or label `changes-requested` to send back, and run `/harness:build #<PRD>` again to continue.
-
-7. **Failed tickets.** Read the failing ticket's log and branch, summarise what went wrong, and offer to rerun (the loop reuses the branch) or to hand it to a human with the `ready-for-human` label.
 
 The issue tracker should have been provided to you. If not, tell the user to run `/harness:setup-harness-skills`.

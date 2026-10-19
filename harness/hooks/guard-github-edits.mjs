@@ -1,6 +1,5 @@
 // PreToolUse hook: an agent may add new issues, PRs and comments on GitHub, but editing
 // or deleting existing text (specs, tickets, PRs, comments) needs explicit human approval.
-// Inside a build-loop sandbox (HARNESS_SANDBOX=1) there is no human to ask, so it is blocked.
 import { readFileSync } from "node:fs";
 
 const input = JSON.parse(readFileSync(0, "utf8"));
@@ -16,14 +15,11 @@ const rules = [
 const hit = rules.find(([pattern]) => pattern.test(command));
 if (!hit) process.exit(0);
 
-const inSandbox = process.env.HARNESS_SANDBOX === "1";
 const reason =
   `The agent wants to ${hit[1]}. Existing text may have been written by a person ` +
   `and the change will appear under your GitHub account.\n\nCommand:\n${command}\n\n` +
-  (inSandbox
-    ? "Blocked: build-loop agents may only add new comments, never edit existing ones."
-    : "Approve only if you have read the new text and agree with it.");
+  "Approve only if you have read the new text and agree with it.";
 
 process.stdout.write(JSON.stringify({
-  hookSpecificOutput: { hookEventName: "PreToolUse", permissionDecision: inSandbox ? "deny" : "ask", permissionDecisionReason: reason },
+  hookSpecificOutput: { hookEventName: "PreToolUse", permissionDecision: "ask", permissionDecisionReason: reason },
 }));
