@@ -168,3 +168,22 @@ Execution-based evidence is A-tier. Test results, console output. Show the exact
 Describe whether it's a one-way or two-way door. You can walk back through two-way doors, but not one-way doors. A PR that is cheap to roll back is lower risk. Changes that involve destructive actions or hard-to-reverse decisions are one-way doors.
 
 The blast radius is the potential impact or scope of the changes introduced by this PR. Consider all possibilities. Examples are layout shift, breakages for consumers, mobile responsiveness, etc.
+
+### Security (ASVS)
+
+**Only include this section when the ticket (issue) has a `## Security (ASVS)` section.** If the ticket has no ASVS requirements, omit the section entirely.
+
+Read the ticket's `## Security (ASVS)` checklist. For each requirement listed there, show what control was implemented and where. One line per requirement:
+
+```markdown
+## Security (ASVS)
+
+| Req | Requirement | Control | Evidence |
+|-----|-------------|---------|----------|
+| V1.2.1 | Input decoded to common format before validation | Single decoding pass in validation middleware | `src/middleware/input.ts`, `tests/input.test.ts` |
+| V6.1.1 | Parameterised queries, no string concatenation | All queries use prepared statements | `src/db/queries.ts`, `tests/db.test.ts` |
+```
+
+Every req ID in this table must match the ticket's ASVS section exactly — no additions, no omissions. The reviewer uses this to verify that the code delivers what the ticket required.
+
+If a rework cycle changes any control, update this table to reflect the current implementation.

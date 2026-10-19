@@ -39,16 +39,7 @@ Until its PR is merged, all work for a ticket stays on that ticket's branch and 
    - Calls `harness:code-review` against the default branch. Fixes real findings. Runs the gate again.
    - Commits with a message naming the ticket (`#<n>`).
    - Pushes with `git push -u origin build/issue-<n>`.
-   - Opens a PR: `gh pr create --base <default-branch> --head build/issue-<n> --title "#<n>: <title>"` with `Closes #<n>` in the body. If the ticket has a `## Security (ASVS)` section, include a **Security** section in the PR body listing each ASVS requirement, what control was implemented, and where (file or test). Keep it short — one line per requirement:
-
-     ```
-     ### Security (ASVS)
-
-     | Req | Control | Evidence |
-     |-----|---------|----------|
-     | V1.2.1 | Input decoded to common format before validation | `src/middleware/input.ts`, `tests/input.test.ts` |
-     | V6.1.1 | Parameterised queries only, no string concatenation | `src/db/queries.ts`, `tests/db.test.ts` |
-     ```
+   - Opens a PR: `gh pr create --base <default-branch> --head build/issue-<n> --title "#<n>: <title>"` with `Closes #<n>` in the body.
 
 4. **For each ticket sent back** (PR labelled `changes-requested`):
    - Check out the existing branch.
@@ -56,7 +47,7 @@ Until its PR is merged, all work for a ticket stays on that ticket's branch and 
    - Address each piece of feedback. Use `harness:tdd` for behaviour changes.
    - Run the gate, then `harness:code-review`, then the gate again.
    - Push to the same branch and remove the `changes-requested` label.
-   - Comment on the PR that feedback has been addressed. If the rework changed any ASVS controls, update the PR body's Security table to reflect the current implementation.
+   - Comment on the PR that feedback has been addressed.
 
 5. **When the pass ends**, report:
    - PRs opened or updated, with links;
