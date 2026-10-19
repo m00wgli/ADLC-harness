@@ -121,3 +121,18 @@ _(Only present when the spec has Security Requirements that apply to this ticket
 </issue-template>
 
 In either form, avoid specific file paths or code snippets: they go stale fast. Exception: if a prototype produced a snippet that encodes a decision more precisely than prose can (state machine, reducer, schema, type shape), inline it and note briefly that it came from a prototype. Trim to the decision-rich parts, not a working demo, just the important bits.
+
+### 6. ASVS distribution gate (deterministic)
+
+If `docs/agents/asvs-checklist.json` exists and has applicable requirements, run verification after all tickets are published:
+
+```bash
+node ${CLAUDE_PLUGIN_ROOT}/scripts/asvs-verify.mjs verify-tickets <prd-number>
+```
+
+This reads every ticket for the PRD from the issue tracker and checks:
+- Every applicable requirement lands on exactly one ticket
+- No requirement is on multiple tickets
+- No unknown requirement appears
+
+If it fails, fix the distribution (move, add or remove ASVS criteria on the tickets) and run it again. Do not proceed to `/harness:build` until this passes.

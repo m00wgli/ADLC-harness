@@ -18,6 +18,18 @@ Check with the user that these seams match their expectations.
 
 3. Write the spec using the template below, then publish it to the project issue tracker. Apply the `prd` label, not `ready-for-agent`: the PRD is not buildable work, its tickets are, and the build loop only picks up `ready-for-agent`. Report the PRD issue number so it can be passed to `/harness:to-tickets #<n>`.
 
+   **ASVS gate (deterministic).** If `docs/agents/asvs-checklist.json` exists, run verification before publishing:
+
+   ```bash
+   node ${CLAUDE_PLUGIN_ROOT}/scripts/asvs-verify.mjs verify-checklist
+   ```
+
+   If it fails, fix the discrepancy and run it again. The PreToolUse hook will also block `gh issue create` if the spec body's ASVS count doesn't match the checklist. After the spec is published, run:
+
+   ```bash
+   node ${CLAUDE_PLUGIN_ROOT}/scripts/asvs-verify.mjs verify-spec <issue-number>
+   ```
+
 <spec-template>
 
 ## Problem Statement
