@@ -1,6 +1,6 @@
 ---
 name: setup-harness-skills
-description: "Configure this repo for the engineering skills: set up its issue tracker, triage labels, domain docs, ASVS security level, and optional preview deploys. Run once before first use of the other engineering skills."
+description: "Configure this repo for the engineering skills: set up its issue tracker, triage labels, domain docs, and optional preview deploys. Run once before first use of the other engineering skills."
 disable-model-invocation: true
 ---
 
@@ -11,92 +11,82 @@ Scaffold the per-repo configuration that the engineering skills assume:
 - **Issue tracker**: where issues live (GitHub by default; local markdown is also supported out of the box)
 - **Triage labels**: the strings used for the five canonical triage roles
 - **Domain docs**: where `GLOSSARY.md` and ADRs live, and the consumer rules for reading them
-- **Security level**: OWASP ASVS level and applicable chapters
 - **Preview deploys** (optional): PR preview URLs via Vercel
 
-This is a prompt-driven skill, not a deterministic script. Explore, present what you found, confirm with the user, then write.
+> **Security level** (OWASP ASVS) is configured separately via `/harness:setup-security-level`.
+
+This is an interactive CLI-menu skill. Use `AskUserQuestion` for structured prompts, then execute the setup based on the answers.
 
 ## Process
 
-### 1. Explore
+### 1. Explore (silent)
 
-Look at the current repo to understand its starting state. Read whatever exists; don't assume:
+Scan the repo to pre-fill defaults. Read whatever exists; don't assume. Do this silently — don't narrate the exploration, just gather the data.
 
-- `git remote -v` and `.git/config`: is this a GitHub repo? Which one?
+- `git remote -v` and `.git/config`: is this a GitHub repo? GitLab? Which one?
 - `AGENTS.md` and `CLAUDE.md` at the repo root: does either exist? Is there already an `## Agent skills` section in either?
 - `GLOSSARY.md` and `GLOSSARY-MAP.md` at the repo root
 - `docs/adr/` and any `src/*/docs/adr/` directories
 - `docs/agents/`: does this skill's prior output already exist?
 - `.scratch/`: a sign that a local-markdown issue tracker convention is already in use
 - Monorepo signals: a `pnpm-workspace.yaml`, a `workspaces` field in `package.json`, or a populated `packages/*` with its own `src/`. These are present only in a genuinely large multi-package repo; their absence means single-context, which is almost every repo.
-- Security signals: existing security configuration (CSP headers, auth middleware, `.env` files with secret names), compliance docs, and whether the app handles authentication, user data, payments, or PII.
+Print a one-line summary (e.g. "Detected GitHub repo `owner/name`, no existing agent config.") then move straight to the menu.
 
-### 2. Present findings and ask
+### 2. CLI menu
 
-Summarise what's present and what's missing. Then take the sections in order. One section, one answer, then the next.
+Use `AskUserQuestion` to collect all choices. Batch questions into calls of up to 4 questions each. Mark the recommended option first with `(Recommended)` in the label.
 
-Lead each section with the recommended answer so the user can accept it in a word. Give a one-line explainer only when the choice genuinely branches; skip the section entirely when exploration already settled it (Section C when there's no monorepo).
+**Call 1 — Core setup** (3 questions):
 
-**Section A: Issue tracker.**
+Question 1 — **Issue tracker** (header: "Tracker"):
+Choose the recommended option based on exploration: if remote points at GitHub, recommend GitHub; if GitLab, recommend GitLab; otherwise recommend Local markdown.
+- `GitHub` — Issues live in GitHub Issues (uses `gh` CLI)
+- `GitLab` — Issues live in GitLab Issues (uses `glab` CLI)
+- `Local markdown` — Issues as files under `.scratch/` (good for solo / no remote)
+- Options note: the user can pick "Other" (always available) to describe a custom workflow
 
-> Explainer: The "issue tracker" is where issues live for this repo. Skills like `to-tickets`, `triage`, and `to-spec` read from and write to it. They need to know whether to call `gh issue create`, write a markdown file under `.scratch/`, or follow some other workflow you describe. Pick the place you actually track work for this repo.
+Question 2 — **Triage labels** (header: "Labels"):
+- `Keep defaults` — needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix
+- `Customize` — Map your existing labels to these roles
 
-Default posture: these skills were designed for GitHub. If a `git remote` points at GitHub, propose that. If a `git remote` points at GitLab (`gitlab.com` or a self-hosted host), propose GitLab. Otherwise (or if the user prefers), offer:
+Question 3 — **Preview deploys** (header: "Previews"):
+- `Skip for now` — Set up later with `/harness:setup-preview-deploys`
+- `Vercel` — Every PR gets a preview URL
 
-- **GitHub**: issues live in the repo's GitHub Issues (uses the `gh` CLI)
-- **GitLab**: issues live in the repo's GitLab Issues (uses the [`glab`](https://gitlab.com/gitlab-org/cli) CLI)
-- **Local markdown**: issues live as files under `.scratch/<feature>/` in this repo (good for solo projects or repos without a remote)
-- **Other** (Jira, Linear, etc.): ask the user to describe the workflow in one paragraph; the skill will record it as freeform prose
+**Domain docs**: If exploration found monorepo signals, add a 4th question about domain layout (single-context vs multi-context). If no monorepo signals, default to single-context silently — don't ask.
 
-Record the choice in `docs/agents/issue-tracker.md`. The GitHub and GitLab templates carry a "PRs as a request surface" flag, defaulted **off**. Leave it off and don't raise it: a user who wants external PRs in the triage queue can flip the flag in the file later.
+**Follow-up — Custom labels** (only if "Customize" was selected for triage labels):
 
-**Section B: Triage label vocabulary.** Always run this section. `triage` ships with the harness, and `to-spec` and `to-tickets` apply `ready-for-agent` too.
+Ask the user for their override strings. Use one `AskUserQuestion` per label role, or ask the user to type all overrides via the "Other" free-text option.
 
-Ask exactly one question:
+### 3. Summary and confirm
 
-> Do you want to keep the default triage labels? (recommended: **yes**)
+After all menu choices are collected, show a compact summary table of what will be written:
 
-The defaults are the five canonical roles, each label string equal to its name: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. On **yes**, write them as-is. Only if the user says no, usually because their tracker already uses other names (e.g. `bug:triage` for `needs-triage`), collect the overrides so `triage` applies existing labels instead of creating duplicates.
+```
+  Tracker:   GitHub (owner/repo)
+  Labels:    defaults
+  Domain:    single-context
+  Previews:  skip
+```
 
-**Section C: Domain docs.** Default to **single-context** (one `GLOSSARY.md` + `docs/adr/` at the repo root). This fits almost every repo; write it without asking.
+Then ask one final confirmation question via `AskUserQuestion` (header: "Confirm"):
+- `Looks good, go` — Write all files
+- `Let me change something` — Re-run the menu
 
-Offer **multi-context** (a root `GLOSSARY-MAP.md` pointing to per-context `GLOSSARY.md` files) only when exploration found monorepo signals. Then confirm which layout they want.
+### 4. Execute
 
-**Section D: Security level.** Ask:
+On confirmation, write everything without further questions.
 
-> Do you want to target an OWASP ASVS security level? (recommended: **L1** for most projects)
->
-> - **L1 (Basic):** 70 requirements. Minimum for all applications. Largely automatable.
-> - **L2 (Standard):** 183 requirements (includes L1). For apps handling sensitive data, auth, transactions.
-> - **L3 (Advanced):** 345 requirements (includes L1 + L2). For critical infrastructure, financial, healthcare.
-> - **None:** no ASVS compliance tracking. The existing security-and-hardening practices still apply, but no structured ASVS checklist is generated during planning.
+**Issue tracker**: Record the choice in `docs/agents/issue-tracker.md`. The GitHub and GitLab templates carry a "PRs as a request surface" flag, defaulted **off**. Leave it off and don't raise it.
 
-On **None**, skip the chapter selection, write `docs/agents/security-level.md` with `Level: none`, and move on. Downstream skills will see `none` and skip ASVS-specific steps.
+**Triage labels**: Write defaults or overrides to `docs/agents/triage-labels.md`.
 
-On **L1/L2/L3**, present the 17 ASVS chapters as a checklist. Pre-check chapters based on what Section D revealed: if there is no frontend, uncheck V3 (Web Frontend Security) and V17 (WebRTC); if there is no file upload, uncheck V5 (File Handling); if there is no OAuth, uncheck V10 (OAuth and OIDC). Chapters that almost always apply are pre-checked: V1, V2, V13, V14, V15, V16. The user checks or unchecks each chapter — they own the final selection.
+**Domain docs**: Write `docs/agents/domain.md`. Default to single-context (one `GLOSSARY.md` + `docs/adr/` at the repo root). Use multi-context only if the user chose it.
 
-Record in `docs/agents/security-level.md` using the template at [security-level.md](./security-level.md). The ASVS reference data lives at `${CLAUDE_PLUGIN_ROOT}/references/asvs/asvs-5.0.0.flat.json` (345 requirements, OWASP ASVS 5.0.0).
+**Preview deploys**: On **Vercel**, read [setup-preview-deploys](${CLAUDE_PLUGIN_ROOT}/skills/setup/setup-preview-deploys/SKILL.md) and follow it. On **Skip**, do nothing.
 
-**Section E: Preview deploys (optional).** Not every project deploys, and not every deployment needs previews.
-
-> Do you want PR preview deploys? (recommended: **skip for now**)
->
-> - **Vercel**: every PR gets a preview URL
-> - **Other**: describe your preview workflow
-> - **Skip**: set up later with `/harness:setup-preview-deploys`
-
-On **Vercel**, read [setup-preview-deploys](${CLAUDE_PLUGIN_ROOT}/skills/setup/setup-preview-deploys/SKILL.md) and follow it. On **skip**, move on; the user can always run `/harness:setup-preview-deploys` later.
-
-### 3. Confirm and edit
-
-Show the user a draft of:
-
-- The `## Agent skills` block to add to whichever of `CLAUDE.md` / `AGENTS.md` is being edited (see step 4 for selection rules)
-- The contents of `docs/agents/issue-tracker.md`, `docs/agents/domain.md`, `docs/agents/triage-labels.md`, and `docs/agents/security-level.md`
-
-Let them edit before writing.
-
-### 4. Write
+### 5. Write
 
 **Pick the file to edit:**
 
@@ -124,10 +114,6 @@ The block:
 ### Domain docs
 
 [one-line summary of layout: "single-context" or "multi-context"]. See `docs/agents/domain.md`.
-
-### Security level
-
-ASVS [L1/L2/L3] with [N] applicable chapters ([count] requirements). See `docs/agents/security-level.md`.
 ```
 
 Always include the `### Triage labels` sub-block and write `docs/agents/triage-labels.md`.
@@ -139,7 +125,6 @@ Then write the docs files using the seed templates in this skill folder as a sta
 - [issue-tracker-local.md](./issue-tracker-local.md): local-markdown issue tracker
 - [triage-labels.md](./triage-labels.md): label mapping
 - [domain.md](./domain.md): domain doc consumer rules + layout
-- [security-level.md](./security-level.md): ASVS level, applicable chapters, and reference data pointer
 
 For "other" issue trackers, write `docs/agents/issue-tracker.md` from scratch using the user's description.
 
@@ -159,6 +144,6 @@ gh label create changes-requested   --color D93F0B --description "PR needs rewor
 
 Use the user's override strings if Section B collected any. For GitLab, use `glab label create` with the same names. For local markdown, skip this step. Then list the labels (`gh label list`) and confirm each one exists.
 
-### 5. Done
+### 6. Done
 
 Tell the user the setup is complete and which engineering skills will now read from these files. Mention they can edit `docs/agents/*.md` directly later; re-running this skill is only necessary if they want to switch issue trackers or restart from scratch.
