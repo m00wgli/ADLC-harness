@@ -18,17 +18,7 @@ Check with the user that these seams match their expectations.
 
 3. Write the spec using the template below, then publish it to the project issue tracker. Apply the `prd` label, not `ready-for-agent`: the PRD is not buildable work, its tickets are, and the build loop only picks up `ready-for-agent`. Report the PRD issue number so it can be passed to `/harness:to-tickets #<n>`.
 
-   **ASVS gate (deterministic).** If `docs/agents/asvs-checklist.json` exists, run verification before publishing:
-
-   ```bash
-   node ${CLAUDE_PLUGIN_ROOT}/scripts/asvs-verify.mjs verify-checklist
-   ```
-
-   If it fails, fix the discrepancy and run it again. The PreToolUse hook will also block `gh issue create` if the spec body's ASVS count doesn't match the checklist. After the spec is published, run:
-
-   ```bash
-   node ${CLAUDE_PLUGIN_ROOT}/scripts/asvs-verify.mjs verify-spec <issue-number>
-   ```
+   The Security Requirements section is a placeholder at this stage — it is populated later by `/harness:security-asvs` (step 6 of `/harness:plan`).
 
 <spec-template>
 
@@ -70,20 +60,7 @@ Exception: if a prototype produced a snippet that encodes a decision more precis
 
 ## Security Requirements
 
-ASVS requirements applicable to this feature, derived from the security grilling (step 4 of `/harness:plan`). If no ASVS level is set, note that and skip this section.
-
-List every requirement confirmed as "Yes" in step 4 of `/harness:plan`. For each:
-
-- **Req ID** (e.g. V6.1.1)
-- **Chapter** (e.g. Authentication)
-- **Requirement** (the full description from the ASVS standard)
-- **How it applies** (one line: what this means concretely for this feature)
-
-Group by chapter. End the section with a count line: **Total: X requirements across Y chapters (ASVS [level]).**
-
-This count must match the count from the plan's step 4c. If it doesn't, requirements were lost — reconcile before publishing the spec.
-
-These requirements flow into ticket acceptance criteria and become verification checkboxes during the build phase.
+_(Added by `/harness:security-asvs` after the spec is published. Do not write this section manually.)_
 
 ## Testing Decisions
 
@@ -92,7 +69,7 @@ A list of testing decisions that were made. Include:
 - A description of what makes a good test (only test external behavior, not implementation details)
 - Which modules will be tested
 - Prior art for the tests (i.e. similar types of tests in the codebase)
-- Security test cases for the ASVS requirements listed above (where automatable)
+- Security test cases for the ASVS requirements (added by `/harness:security-asvs`, where automatable)
 
 ## Out of Scope
 

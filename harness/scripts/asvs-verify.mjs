@@ -75,11 +75,28 @@ function verifyChecklist(checklist) {
   const dupes = ids.filter((id, i) => ids.indexOf(id) !== i);
   if (dupes.length) errors.push(`Duplicate req IDs: ${[...new Set(dupes)].join(", ")}`);
 
+  if (!Array.isArray(checklist.chapters) || checklist.chapters.length === 0) {
+    errors.push("Missing or empty 'chapters' array");
+  }
+
+  const validScopes = ["application", "feature"];
+  const applicableWithoutScope = applicable.filter((r) => !validScopes.includes(r.scope));
+  if (applicableWithoutScope.length) {
+    errors.push(`${applicableWithoutScope.length} applicable requirements missing valid scope ("application" or "feature"): ${applicableWithoutScope.map((r) => r.req_id).join(", ")}`);
+  }
+
+  const naWithScope = notApplicable.filter((r) => r.scope != null);
+  if (naWithScope.length) {
+    errors.push(`${naWithScope.length} N/A requirements have non-null scope: ${naWithScope.map((r) => r.req_id).join(", ")}`);
+  }
+
   if (errors.length) {
     die(`Checklist internal inconsistency:\n  - ${errors.join("\n  - ")}`);
   }
 
-  console.log(`ASVS verify-checklist: OK — ${applicable.length} applicable, ${notApplicable.length} N/A, ${reqs.length} total`);
+  const appWide = applicable.filter((r) => r.scope === "application").length;
+  const featureSpecific = applicable.filter((r) => r.scope === "feature").length;
+  console.log(`ASVS verify-checklist: OK — ${applicable.length} applicable (${appWide} application, ${featureSpecific} feature), ${notApplicable.length} N/A, ${reqs.length} total`);
 }
 
 // -- verify-spec: spec issue ASVS count matches checklist --

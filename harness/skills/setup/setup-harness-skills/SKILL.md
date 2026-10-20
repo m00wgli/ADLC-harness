@@ -11,9 +11,7 @@ Scaffold the per-repo configuration that the engineering skills assume:
 - **Issue tracker**: where issues live (GitHub by default; local markdown is also supported out of the box)
 - **Triage labels**: the strings used for the five canonical triage roles
 - **Domain docs**: where `GLOSSARY.md` and ADRs live, and the consumer rules for reading them
-- **Preview deploys** (optional): PR preview URLs via Vercel
-
-> **Security level** (OWASP ASVS) is configured separately via `/harness:setup-security-level`.
+Preview deploys and security level are configured separately (via `/harness:setup-preview-deploys` and `/harness:setup-security-level`), or all at once via `/harness:setup`.
 
 This is an interactive CLI-menu skill. Use `AskUserQuestion` for structured prompts, then execute the setup based on the answers.
 
@@ -36,7 +34,7 @@ Print a one-line summary (e.g. "Detected GitHub repo `owner/name`, no existing a
 
 Use `AskUserQuestion` to collect all choices. Batch questions into calls of up to 4 questions each. Mark the recommended option first with `(Recommended)` in the label.
 
-**Call 1 — Core setup** (3 questions):
+**Call 1 — Core setup** (2 questions):
 
 Question 1 — **Issue tracker** (header: "Tracker"):
 Choose the recommended option based on exploration: if remote points at GitHub, recommend GitHub; if GitLab, recommend GitLab; otherwise recommend Local markdown.
@@ -48,10 +46,6 @@ Choose the recommended option based on exploration: if remote points at GitHub, 
 Question 2 — **Triage labels** (header: "Labels"):
 - `Keep defaults` — needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix
 - `Customize` — Map your existing labels to these roles
-
-Question 3 — **Preview deploys** (header: "Previews"):
-- `Skip for now` — Set up later with `/harness:setup-preview-deploys`
-- `Vercel` — Every PR gets a preview URL
 
 **Domain docs**: If exploration found monorepo signals, add a 4th question about domain layout (single-context vs multi-context). If no monorepo signals, default to single-context silently — don't ask.
 
@@ -67,7 +61,6 @@ After all menu choices are collected, show a compact summary table of what will 
   Tracker:   GitHub (owner/repo)
   Labels:    defaults
   Domain:    single-context
-  Previews:  skip
 ```
 
 Then ask one final confirmation question via `AskUserQuestion` (header: "Confirm"):
@@ -83,8 +76,6 @@ On confirmation, write everything without further questions.
 **Triage labels**: Write defaults or overrides to `docs/agents/triage-labels.md`.
 
 **Domain docs**: Write `docs/agents/domain.md`. Default to single-context (one `GLOSSARY.md` + `docs/adr/` at the repo root). Use multi-context only if the user chose it.
-
-**Preview deploys**: On **Vercel**, read [setup-preview-deploys](${CLAUDE_PLUGIN_ROOT}/skills/setup/setup-preview-deploys/SKILL.md) and follow it. On **Skip**, do nothing.
 
 ### 5. Write
 

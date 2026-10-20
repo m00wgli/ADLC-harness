@@ -32,7 +32,10 @@ Break the work into **tracer bullet** tickets.
 - A completed slice is demoable or verifiable on its own
 - Each slice is sized to fit in a single fresh context window
 - Any prefactoring should be done first
-- If the spec has a **Security Requirements** section, distribute **all** ASVS requirements from it across the tickets. Each ASVS requirement becomes an acceptance criterion on the ticket whose vertical slice implements the relevant behaviour. A requirement that spans multiple slices goes on the earliest ticket that can verify it. **Every requirement must land on exactly one ticket.** After distribution, count the total ASVS criteria across all tickets and verify it matches the spec's total. If they don't match, requirements were lost — reconcile before publishing.
+- If the spec has a **Security Requirements** section, distribute **all** applicable ASVS requirements across the tickets:
+  - **Feature-scoped** requirements (`scope: "feature"` in the checklist): each becomes an acceptance criterion on the ticket whose vertical slice implements the relevant behaviour. A requirement that spans multiple slices goes on the earliest ticket that can verify it.
+  - **Application-scoped** requirements (`scope: "application"` in the checklist): each goes on the ticket that sets up the relevant infrastructure or cross-cutting concern. If no single ticket owns that concern, place it on the earliest ticket that touches the relevant layer.
+  - **Every applicable requirement must land on exactly one ticket.** After distribution, count the total ASVS criteria across all tickets and verify it matches the spec's total. If they don't match, requirements were lost — reconcile before publishing.
 
 </vertical-slice-rules>
 
