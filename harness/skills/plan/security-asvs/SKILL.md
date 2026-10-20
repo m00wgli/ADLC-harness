@@ -164,10 +164,12 @@ node ${CLAUDE_PLUGIN_ROOT}/scripts/asvs-verify.mjs verify-checklist
 
 Edit the PRD issue to replace the `## Security Requirements` placeholder. Use `gh issue edit <number>` to update the body.
 
-Format — only applicable requirements, grouped by chapter:
+Format — only applicable requirements, grouped by chapter. The section opens with the ASVS version and chosen level so any reader knows the standard and threshold at a glance:
 
 ```markdown
 ## Security Requirements
+
+Security requirements mapped from **OWASP ASVS 5.0** at **Level 2** (L2 — 253 cumulative requirements). Chapters selected based on the feature's grilling and spec analysis.
 
 ### V6 — Authentication
 

@@ -12,13 +12,9 @@ The issue tracker and triage label vocabulary should have been provided to you. 
 
 1. Explore the repo to understand the current state of the codebase, if you haven't already. Use the project's domain glossary vocabulary throughout the spec, and respect any ADRs in the area you're touching.
 
-2. Sketch out the seams at which you're going to test the feature. Existing seams should be preferred to new ones. Use the highest seam possible. If new seams are needed, propose them at the highest point you can. The fewer seams across the codebase, the better - the ideal number is one.
+2. Write the spec using the template below, then publish it to the project issue tracker. Apply the `prd` label, not `ready-for-agent`: the PRD is not buildable work, its tickets are, and the build loop only picks up `ready-for-agent`. Report the PRD issue number so it can be passed to `/harness:to-tickets #<n>`.
 
-Check with the user that these seams match their expectations.
-
-3. Write the spec using the template below, then publish it to the project issue tracker. Apply the `prd` label, not `ready-for-agent`: the PRD is not buildable work, its tickets are, and the build loop only picks up `ready-for-agent`. Report the PRD issue number so it can be passed to `/harness:to-tickets #<n>`.
-
-   The Security Requirements section is a placeholder at this stage — it is populated later by `/harness:security-asvs` (step 6 of `/harness:plan`).
+   The Security Requirements section is a placeholder at this stage — it is populated later by `/harness:security-asvs` (step 6 of `/harness:plan`). Testing seams should already have been agreed during the grilling (step 3 of `/harness:plan`).
 
 <spec-template>
 

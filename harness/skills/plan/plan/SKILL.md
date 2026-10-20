@@ -55,6 +55,8 @@ Then give the user a short **source brief**, in the conversation, not in a file:
 
 Call the Skill tool twice, for "harness:grilling" and "harness:domain-modeling". Grill from the source brief until every branch of the design tree is settled, starting with what the sources leave open. The sources' vocabulary is the first candidate for the glossary; challenge it where it is fuzzy or overloaded. Glossary terms and ADRs land as they are decided, not at the end.
 
+As part of the grilling, identify the **testing seams**: the points in the architecture where tests will observe the feature's behaviour. Existing seams should be preferred to new ones. Use the highest seam possible. The fewer seams across the codebase, the better — the ideal number is one. Confirm the seams with the user before moving on.
+
 ### 4. First checkpoint
 
 Summarise what was decided in a handful of lines, in the glossary's language, and ask: **"Ready to write the spec?"** Go on only on a yes. A no means more grilling.
