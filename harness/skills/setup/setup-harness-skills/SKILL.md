@@ -135,6 +135,25 @@ gh label create changes-requested   --color D93F0B --description "PR needs rewor
 
 Use the user's override strings if Section B collected any. For GitLab, use `glab label create` with the same names. For local markdown, skip this step. Then list the labels (`gh label list`) and confirm each one exists.
 
+**Protect the main branch.** For GitHub, enable branch protection on `main` so code only lands via reviewed PRs. Infer `OWNER/REPO` from `gh repo view --json nameWithOwner -q .nameWithOwner`:
+
+```bash
+gh api repos/OWNER/REPO/branches/main/protection -X PUT \
+  --input - <<'EOF'
+{
+  "required_pull_request_reviews": {
+    "required_approving_review_count": 1,
+    "dismiss_stale_reviews": true
+  },
+  "enforce_admins": false,
+  "required_status_checks": null,
+  "restrictions": null
+}
+EOF
+```
+
+If the API returns a 403 (plan doesn't support branch protection on private repos), log a warning and continue — the rest of the setup is still valid. For GitLab, use `glab api projects/:id/protected_branches -X POST -f name=main -f push_access_level=0 -f merge_access_level=30` (no direct push, maintainers merge). For local markdown, skip this step.
+
 ### 6. Done
 
 Tell the user the setup is complete and which engineering skills will now read from these files. Mention they can edit `docs/agents/*.md` directly later; re-running this skill is only necessary if they want to switch issue trackers or restart from scratch.
