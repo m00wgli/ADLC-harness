@@ -1,5 +1,5 @@
 ---
-name: setup
+name: setup-all
 description: "Full harness setup: configure issue tracker, labels, domain docs, optionally enable Vercel previews, and set the ASVS security level. Run once before first use. Applicable ASVS chapters are selected later during /harness:plan."
 disable-model-invocation: true
 ---
