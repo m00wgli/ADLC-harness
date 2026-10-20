@@ -1,7 +1,7 @@
 {
   "name": "harness",
   "displayName": "AE Harness",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "Agent harness: /harness:setup configures the project; /harness:plan takes an idea to a spec and GitHub tickets; /harness:build builds each ticket on its own branch and opens a PR for human review.",
   "author": { "name": "Dean Terneu" },
   "skills": ["./skills/setup/", "./skills/plan/", "./skills/intake/", "./skills/build/"]
