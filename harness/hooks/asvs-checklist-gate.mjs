@@ -1,9 +1,12 @@
 #!/usr/bin/env node
-// PreToolUse hook: blocks writes to asvs-checklist.json when the requirements
-// don't match what asvs-filter.mjs produces for the given level and chapters.
+// PreToolUse hook: blocks writes to asvs-checklist.json when the content
+// doesn't match the deterministic asvs-filter.mjs output.
 //
-// Ensures the agent can't hallucinate or omit requirements — only the
-// deterministic filter output is accepted as the canonical requirement set.
+// Enforces:
+// - req_id set matches filter output exactly (no hallucinated, no missing)
+// - req_description matches the ASVS source data verbatim
+// - level matches security-level.md
+// - chapter_id and chapter_name match the source data
 import { readFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { resolve, dirname } from "node:path";
@@ -62,29 +65,55 @@ try {
   block(`Failed to run asvs-filter.mjs for validation: ${e.stderr || e.message}`);
 }
 
+// Level must match security-level.md
 if (checklist.level !== filterOutput.level) {
   block(`Checklist level "${checklist.level}" does not match security-level.md level "${filterOutput.level}".`);
 }
 
-const validIds = new Set(filterOutput.requirements.map((r) => r.req_id));
-const checklistIds = (checklist.requirements || []).map((r) => r.req_id);
+// Build lookup from canonical filter output
+const canonical = new Map(filterOutput.requirements.map((r) => [r.req_id, r]));
+const checklistReqs = checklist.requirements || [];
+const checklistIds = checklistReqs.map((r) => r.req_id);
+const errors = [];
 
-const hallucinated = checklistIds.filter((id) => !validIds.has(id));
+// No hallucinated requirements
+const hallucinated = checklistIds.filter((id) => !canonical.has(id));
 if (hallucinated.length) {
-  block(
-    `${hallucinated.length} requirement(s) in checklist not in ASVS filter output for ${checklist.level} + [${checklist.chapters.join(", ")}]:\n` +
-      `  ${hallucinated.slice(0, 10).join(", ")}${hallucinated.length > 10 ? "..." : ""}\n\n` +
-      `Only requirements from asvs-filter.mjs may appear in the checklist.`,
+  errors.push(
+    `${hallucinated.length} req(s) not in filter output: ${hallucinated.slice(0, 10).join(", ")}${hallucinated.length > 10 ? "..." : ""}`,
   );
 }
 
+// No missing requirements
 const checklistIdSet = new Set(checklistIds);
-const missing = [...validIds].filter((id) => !checklistIdSet.has(id));
+const missing = [...canonical.keys()].filter((id) => !checklistIdSet.has(id));
 if (missing.length) {
+  errors.push(
+    `${missing.length} req(s) from filter output missing: ${missing.slice(0, 10).join(", ")}${missing.length > 10 ? "..." : ""}`,
+  );
+}
+
+// req_description, chapter_id, chapter_name must match source data verbatim
+for (const req of checklistReqs) {
+  const src = canonical.get(req.req_id);
+  if (!src) continue;
+
+  if (req.req_description !== src.req_description) {
+    errors.push(`${req.req_id}: req_description does not match ASVS source data — copy it verbatim from the filter output`);
+  }
+  if (req.chapter_id !== src.chapter_id) {
+    errors.push(`${req.req_id}: chapter_id "${req.chapter_id}" should be "${src.chapter_id}"`);
+  }
+  if (req.chapter_name !== src.chapter_name) {
+    errors.push(`${req.req_id}: chapter_name "${req.chapter_name}" should be "${src.chapter_name}"`);
+  }
+}
+
+if (errors.length) {
   block(
-    `${missing.length} requirement(s) from ASVS filter output missing from checklist:\n` +
-      `  ${missing.slice(0, 10).join(", ")}${missing.length > 10 ? "..." : ""}\n\n` +
-      `Every requirement from the filter must appear (with applies: true or false).`,
+    `asvs-checklist.json validation failed (${errors.length} error${errors.length > 1 ? "s" : ""}):\n` +
+      errors.map((e) => `  - ${e}`).join("\n") +
+      "\n\nThe checklist must contain exactly the requirements from asvs-filter.mjs with verbatim req_description, chapter_id, and chapter_name. Only applies, scope, and rationale may differ.",
   );
 }
 
