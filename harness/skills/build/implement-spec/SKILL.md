@@ -35,6 +35,13 @@ Until its PR is merged, all work for a ticket stays on that ticket's branch and 
    - Creates (or reuses) the branch `build/issue-<n>` from the default branch.
    - Reads the ticket (`gh issue view <n> --comments`), the parent PRD, `GLOSSARY.md`, and `docs/adr/`.
    - Calls `harness:tdd` and follows it: one failing test, then just enough code to pass, repeat until the acceptance criteria are met.
+   - **Verify completeness** before running the gate. Walk both checklists from the ticket and confirm each item has code and a test:
+
+     **Acceptance criteria** — read the ticket's acceptance criteria list. For each criterion, name the code that implements it and the test that covers it. If any criterion has no test at a pre-agreed seam, write one now. If any criterion has no implementation, implement it now via `harness:tdd`.
+
+     **ASVS requirements** — if the ticket has a `## Security (ASVS)` section, read it. For each requirement marked as applicable, name the control that implements it and the test that verifies the control. Security controls without test coverage must get a test before proceeding. If a requirement is application-wide (scope: application) and the control lives outside this ticket's code, note where it is — do not duplicate it, but verify the existing control has a test.
+
+     Only proceed to the gate when every acceptance criterion and every applicable ASVS requirement has both an implementation and a test.
    - Runs the gate: `npm run --if-present typecheck && npm run --if-present test`. On failure, fix and retry up to 3 times.
    - Calls `harness:code-review` against the default branch. Fixes real findings. Runs the gate again.
    - Commits with a message naming the ticket (`#<n>`).
