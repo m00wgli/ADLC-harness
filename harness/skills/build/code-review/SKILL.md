@@ -77,15 +77,6 @@ Present the two reports under `## Standards` and `## Spec` headings, verbatim or
 
 End with a one-line summary: total findings per axis, and the worst issue _within each axis_ (if any). Don't pick a single winner across axes: that's the reranking the separation exists to prevent.
 
-## Checklist coverage
-
-After both axes report, walk the ticket's lists:
-
-- **Acceptance criteria** — every criterion must have an implementation and a test. Flag any that are missing or partial.
-- **ASVS requirements** — if the ticket has a `## Security (ASVS)` section, every applicable requirement must have a control implemented. Testable controls must have a test. Infrastructure controls (TLS, CSP, key rotation) need the implementation verified but not a forced seam test.
-
-Report gaps under a `## Coverage` heading after the two axis reports.
-
 ## Why two axes
 
 A change can pass one axis and fail the other:
