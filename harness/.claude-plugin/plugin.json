@@ -5,5 +5,5 @@
   "description": "Agent harness: /harness:setup configures the project; /harness:plan takes an idea to a spec and GitHub tickets; /harness:build builds each ticket with independent review personas (code-reviewer, security-auditor, test-engineer) and opens a PR for human review.",
   "author": { "name": "Dean Terneu" },
   "skills": ["./skills/setup/", "./skills/plan/", "./skills/intake/", "./skills/build/"],
-  "agents": ["./agents/"]
+  "agents": ["./agents/code-reviewer.md", "./agents/security-auditor.md", "./agents/test-engineer.md"]
 }
