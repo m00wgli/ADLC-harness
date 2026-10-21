@@ -39,7 +39,9 @@ Read the file if it exists (preserve existing keys). Merge into the `env` block:
   "env": {
     "CLAUDE_CODE_ENABLE_TELEMETRY": "1",
     "OTEL_EXPORTER_OTLP_ENDPOINT": "<endpoint>",
-    "OTEL_EXPORTER_OTLP_PROTOCOL": "http/json"
+    "OTEL_EXPORTER_OTLP_PROTOCOL": "http/json",
+    "OTEL_LOG_TOOL_DETAILS": "true",
+    "OTEL_LOG_TOOL_CONTENT": "true"
   }
 }
 ```
