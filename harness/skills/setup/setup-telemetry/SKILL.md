@@ -10,7 +10,7 @@ Configure Claude Code's built-in OpenTelemetry export so every session ships tra
 
 ## 1. Check current state
 
-Read `.claude/settings.json` if it exists. If `env.OTEL_EXPORTER_OTLP_ENDPOINT` is already set, show it and ask whether to reconfigure or keep it.
+Read `~/.claude/settings.json` (global) and `.claude/settings.json` (project) if they exist. If `OTEL_EXPORTER_OTLP_ENDPOINT` is already set in the global config, show it and ask whether to reconfigure or keep it.
 
 ## 2. Ask
 
@@ -28,18 +28,35 @@ Service name defaults to the repo directory name (infer from `basename $(git rev
 
 ## 4. Write settings
 
-Read `.claude/settings.json` if it exists (preserve existing keys). Merge the OTLP env vars into the `env` block:
+Claude Code ignores OTEL exporter vars at project level — they must be in the **global** settings (`~/.claude/settings.json`). Only `OTEL_SERVICE_NAME` works per-project.
+
+### Global settings (`~/.claude/settings.json`)
+
+Read the file if it exists (preserve existing keys). Merge into the `env` block:
 
 ```json
 {
   "env": {
+    "CLAUDE_CODE_ENABLE_TELEMETRY": "1",
     "OTEL_EXPORTER_OTLP_ENDPOINT": "<endpoint>",
+    "OTEL_EXPORTER_OTLP_PROTOCOL": "http/json"
+  }
+}
+```
+
+### Per-project settings (`.claude/settings.json`)
+
+Read the file if it exists (preserve existing keys). Merge into the `env` block:
+
+```json
+{
+  "env": {
     "OTEL_SERVICE_NAME": "<service-name>"
   }
 }
 ```
 
-Do not overwrite other keys in `env` or elsewhere in the file.
+Do not overwrite other keys in `env` or elsewhere in either file.
 
 ## 5. Verify connectivity
 
@@ -87,6 +104,7 @@ Disabled. See `docs/agents/telemetry.md`.
 ## 7. Done
 
 Tell the user the telemetry config is written. Mention:
-- Traces ship automatically on every Claude Code session in this project.
-- They can change the endpoint or service name in `.claude/settings.json` at any time.
+- Traces ship automatically on every Claude Code session.
+- Global exporter config lives in `~/.claude/settings.json`; per-project service name in `.claude/settings.json`.
 - To set up a local collector stack, `ccusage` or a Grafana LGTM stack are good starting points.
+- If traces don't appear, run `claude --debug-file debug.log` and look for `[3P telemetry]` entries.
