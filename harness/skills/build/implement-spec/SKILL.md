@@ -19,7 +19,9 @@ Adhere to the [core behaviors](${CLAUDE_PLUGIN_ROOT}/references/core-behaviors.m
 
 4. **Run the gate:** `npm run --if-present typecheck && npm run --if-present test`. On failure, fix and retry up to 3 times.
 
-5. **Commit** with a message naming the ticket (`#<n>`).
+5. **Browser testing (UI tickets only).** If the ticket touches UI (components, pages, styles, frontend routes), read [browser-testing](${CLAUDE_PLUGIN_ROOT}/skills/build/browser-testing/SKILL.md) and follow it. Fix any Critical or Serious findings before proceeding. Include the browser testing report in your output.
+
+6. **Commit** with a message naming the ticket (`#<n>`).
 
 That's it. Do not push, open a PR, or run a code review — the orchestrator handles those after the review fan-out.
 

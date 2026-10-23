@@ -1,7 +1,7 @@
 {
   "name": "harness",
   "displayName": "AE Harness",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "description": "Agent harness: /harness:setup configures the project; /harness:design takes any input to a spec (PRD); /harness:plan cuts the spec into tickets; /harness:build builds each ticket with independent review personas (code-reviewer, security-auditor, test-engineer) and opens a PR for human review.",
   "author": { "name": "Dean Terneu" },
   "skills": ["./skills/setup/", "./skills/design/", "./skills/plan/", "./skills/meta/", "./skills/build/"],

@@ -46,7 +46,7 @@ Run the four stages sequentially. **Stages 1 and 3 are sub-agents that write cod
 
 #### Stage 1 — Implement
 
-Spawn a sub-agent that reads [implement-spec](${CLAUDE_PLUGIN_ROOT}/skills/build/implement-spec/SKILL.md) and follows it for ticket `#<n>`. It creates the branch, runs TDD driven by acceptance criteria + ASVS, runs the gate, and commits. It does **not** push, open a PR, or review.
+Spawn a sub-agent that reads [implement-spec](${CLAUDE_PLUGIN_ROOT}/skills/build/implement-spec/SKILL.md) and follows it for ticket `#<n>`. It creates the branch, runs TDD driven by acceptance criteria + ASVS, runs the gate, and commits. If the ticket touches UI, it also runs [browser-testing](${CLAUDE_PLUGIN_ROOT}/skills/build/browser-testing/SKILL.md) and fixes Critical/Serious findings before committing. It does **not** push, open a PR, or review.
 
 #### Stage 2 — Review (parallel fan-out)
 
@@ -79,7 +79,7 @@ If no Critical or Required findings, skip this stage.
 
 On the orchestrator (you):
 - Push with `git push -u origin build/issue-<n>`.
-- Write the PR description using `harness:pr`. Include the three review reports (summarised) in the PR body.
+- Write the PR description using `harness:pr`. Include the three review reports (summarised) in the PR body. If the implement agent produced a browser testing report, include it as a fourth section.
 - Open the PR: `gh pr create --base <default-branch> --head build/issue-<n> --title "#<n>: <title>"` with `Closes #<n>` in the body.
 
 ### 5. For each ticket sent back

@@ -11,6 +11,10 @@ Adhere to the [core behaviors](${CLAUDE_PLUGIN_ROOT}/references/core-behaviors.m
 
 When exploring the codebase, read `GLOSSARY.md` (if it exists) to get a clear mental model of the relevant modules, and check ADRs in the area you're touching.
 
+## UI bugs
+
+For bugs that manifest in the browser (visual glitches, interaction failures, console errors), read [browser-testing](${CLAUDE_PLUGIN_ROOT}/skills/build/browser-testing/SKILL.md) and use it to reproduce the issue before investigating code. The browser testing report becomes your Phase 1 feedback loop.
+
 ## Redact
 
 This skill has you show commands, outputs and captured artifacts. **Redact every secret first**: write `<REDACTED>` in its place. Build loops against env vars, so the credential stays in the environment rather than in what you show. Captured artifacts carry auth headers: quote only the lines that carry the signal.
