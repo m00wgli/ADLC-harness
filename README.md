@@ -1,108 +1,213 @@
-# ADLC-harness
+# AE Harness
 
-A custom agent harness for Claude Code, packaged as the `harness` plugin. Its skills take a project from idea to GitHub tickets, then build each ticket in a Docker sandbox and open a pull request for human review.
+A Claude Code plugin that takes a project from idea to pull request. Four phases — **setup**, **design**, **plan**, **build** — each with its own entry command. The human stays in control: every spec needs approval before tickets are cut, and every PR needs a merge before the next ticket is built.
 
 ```
-harness/
-├── .claude-plugin/plugin.json
-├── hooks/           guard-github-edits (approval before editing GitHub text), notify-record-changes (notice on ADR/glossary changes)
-├── skills/
-│   ├── setup/       setup-harness-skills, setup-build-loop, setup-preview-deploys
-│   ├── intake/      triage
-│   ├── plan/        plan, grill-with-docs, grilling, domain-modeling, research, prototype, to-spec, to-tickets
-│   └── build/       build, implement, implement-spec, tdd, code-review, pr, diagnosing-bugs, codebase-design
-└── templates/
-    └── sandcastle/  build loop copied into each project by setup-build-loop
-sandcastle/          fork of mattpocock/sandcastle (git submodule): runs the build loop in Docker sandboxes
-reference/           source repos the harness borrows from (reference only)
+/harness:setup   → configure the repo (once)
+/harness:design  → idea → spec (PRD)
+/harness:plan    → spec → tickets
+/harness:build   → tickets → PRs
 ```
 
-Clone with submodules: `git clone --recurse-submodules https://github.com/m00wgli/ADLC-harness.git`. If you already cloned without them, run `git submodule update --init`.
-
-To pull Matt's latest Sandcastle changes into the fork: `cd sandcastle && git fetch upstream && git merge upstream/main && git push`, then commit the updated submodule pointer here.
-
-## Use
+## Install
 
 ```bash
-claude --plugin-dir ./harness                  # while developing the harness
-```
+# While developing the harness
+claude --plugin-dir ./harness
 
-Or install it in another project:
-
-```
+# Or install from the marketplace
 /plugin marketplace add m00wgli/ADLC-harness
 /plugin install harness@adlc-ae-workflow
 ```
 
+Clone with submodules:
+
+```bash
+git clone --recurse-submodules https://github.com/m00wgli/ADLC-harness.git
+# Already cloned without them?
+git submodule update --init
+```
+
+## Flow
+
+```
+         ┌──────────┐
+         │  Setup   │  one-time: repo, labels, telemetry, security level
+         └────┬─────┘
+              ▼
+         ┌──────────┐
+         │  Design  │  sources → grill → domain model → spec (PRD)
+         └────┬─────┘
+              ▼           ← user approves spec
+         ┌──────────┐
+         │   Plan   │  spec → tickets with blocking edges
+         └────┬─────┘
+              ▼           ← user approves breakdown
+         ┌──────────┐
+    ┌───▶│  Build   │  implement → review (3 personas) → fix → PR
+    │    └────┬─────┘
+    │         ▼
+    │    human reviews PR
+    │    ├── merge      → closes ticket, unblocks next
+    │    └── changes-requested → rework on next run
+    └────────┘
+```
+
+Each phase resumes where the last session stopped. Run `/harness:build #<spec>` again after reviewing PRs to continue with the next unblocked ticket.
+
+## Skills
+
+### Setup
+
+Run once per project. `/harness:setup-all` runs all of them.
+
+| Skill | What it does |
+|-------|-------------|
+| **setup-all** | Full setup: issue tracker, labels, domain docs, previews, security level, telemetry |
+| **setup-harness-skills** | Issue tracker, triage labels, and domain docs |
+| **setup-preview-deploys** | Vercel preview URLs on every PR |
+| **setup-security-level** | Set the OWASP ASVS compliance level |
+| **setup-telemetry** | OTLP tracing for Claude Code sessions |
+
+### Design
+
+`/harness:design <input>` orchestrates these in order. Input can be text, `@file`, `@folder`, a URL, or `#issue`.
+
+| Skill | What it does |
+|-------|-------------|
+| **design** | Orchestrator — sources → grill → checkpoint → spec → security requirements |
+| **grilling** | Stress-test a plan or idea with relentless questions |
+| **grill-with-docs** | Same grilling, writes ADRs and glossary entries as decisions land |
+| **domain-modeling** | Build and sharpen `GLOSSARY.md` and ADRs |
+| **research** | Investigate a question against primary sources |
+| **prototype** | Throwaway prototype to answer a design question |
+| **to-spec** | Turn the conversation into a spec, publish as a `prd` issue |
+| **security-asvs** | Map OWASP ASVS requirements to the spec |
+
+### Plan
+
+`/harness:plan #<spec>` orchestrates these.
+
+| Skill | What it does |
+|-------|-------------|
+| **plan** | Orchestrator — load spec → cut tickets with blocking edges |
+| **to-tickets** | Break a spec into tracer-bullet tickets, publish to the tracker |
+
+### Build
+
+`/harness:build #<spec>` orchestrates these. Each ticket runs: implement → review → fix → PR.
+
+| Skill | What it does |
+|-------|-------------|
+| **build** | Orchestrator — per ticket: implement → 3-persona review → fix → PR |
+| **implement-spec** | TDD a single ticket on its own branch, runs browser testing for UI tickets |
+| **implement** | Implement work from a spec or set of tickets |
+| **tdd** | Red → green → refactor loop |
+| **code-review** | Two-axis review: Standards + Spec compliance |
+| **browser-testing** | Chrome automation for UI verification (visual, console, network, a11y) |
+| **pr** | Write the PR body |
+| **diagnosing-bugs** | Structured diagnosis loop for hard bugs |
+| **codebase-design** | Interface design, seam placement, testability vocabulary |
+
+### Meta
+
+| Skill | What it does |
+|-------|-------------|
+| **triage** | Move incoming issues through a triage state machine |
+
+## Agents
+
+Three review personas run in parallel during the build phase. Each produces an independent report on the same diff.
+
+| Persona | Role | Runs when |
+|---------|------|-----------|
+| **code-reviewer** | Senior Staff Engineer — correctness, readability, architecture, security, performance | Every ticket |
+| **security-auditor** | Security Engineer — ASVS checklist verification, vulnerability scan | Tickets with `## Security (ASVS)` |
+| **test-engineer** | QA Engineer — acceptance criteria coverage, test quality | Every ticket |
+
+Personas do not call each other. The build orchestrator fans them out and merges results.
+
+## Hooks
+
+| Hook | Event | Effect |
+|------|-------|--------|
+| **guard-github-edits** | PreToolUse | Blocks editing/deleting GitHub issues, PRs, or comments without human approval |
+| **asvs-checklist-gate** | PreToolUse | Blocks writes to `asvs-checklist.json` unless content matches deterministic filter |
+| **asvs-count-gate** | PreToolUse | Blocks issue creation when ASVS verification hasn't passed |
+| **notify-record-changes** | PostToolUse | Notifies when an ADR or glossary changes (never blocks) |
+
+## References
+
+| File | Purpose |
+|------|---------|
+| **core-behaviors.md** | Six rules every agent and skill must follow: surface assumptions, manage confusion, push back, enforce simplicity, scope discipline, verify don't assume |
+
+## Labels
+
+Created by `setup-harness-skills` on first run.
+
+| Label | Meaning |
+|-------|---------|
+| `prd` | The spec — never built directly |
+| `ready-for-agent` | Ticket the build phase may pick up |
+| `ready-for-human` | Needs a person |
+| `needs-triage` | Incoming, not yet evaluated |
+| `needs-info` | Waiting on the reporter |
+| `changes-requested` | Send the PR back for rework |
+| `bug` / `enhancement` | Category, set by triage |
+| `wontfix` | Won't be done |
+
+## Maintainable files
+
+Files that must be kept in sync when skills, agents, hooks, or references change.
+
+| File | Synced with | What to check |
+|------|------------|---------------|
+| `README.md` — Skills tables | `harness/skills/*/SKILL.md` | New/removed/renamed skills reflected in tables |
+| `README.md` — Agents table | `harness/agents/*.md` | New/removed personas reflected |
+| `README.md` — Hooks table | `harness/hooks/hooks.json` | New/removed hooks reflected |
+| `README.md` — References table | `harness/references/` | New/removed reference files reflected |
+| `README.md` — Project Structure | all folders above | Tree matches actual layout |
+| `harness/.claude-plugin/plugin.json` | `harness/skills/`, `harness/agents/` | `skills` and `agents` arrays list every folder/file |
+| `setup-harness-skills/SKILL.md` — Skill routing tree | all `SKILL.md` files | New/removed skills appear in the routing tree |
+| `setup-harness-skills/SKILL.md` — CLAUDE.md template | same | Phase table and routing tree written to target repos |
+| `harness/references/asvs/asvs-5.0.0.flat.json` | [OWASP ASVS releases](https://github.com/OWASP/ASVS) | Update when ASVS publishes a new version |
+| `harness/references/core-behaviors.md` | all `SKILL.md` files | Every skill links to this; changes affect all phases |
+| `harness/hooks/hooks.json` | `harness/hooks/*.mjs` | Entry for every hook script, events match |
+| `harness/skills/*/agents/openai.yaml` | each skill's `SKILL.md` | Agent model/config matches what the skill expects |
+
 ## Update
 
-After a new version is pushed (bump `version` in `harness/.claude-plugin/plugin.json` **and** `ARG HARNESS_VERSION` in `harness/templates/sandcastle/Dockerfile` to the same value; `/harness:build` compares them to spot an outdated loop):
+Bump `version` in `harness/.claude-plugin/plugin.json`, push, then:
 
 ```bash
 claude plugin marketplace update adlc-ae-workflow
 claude plugin update harness@adlc-ae-workflow
 ```
 
-Or inside Claude Code: `/plugin` → Marketplaces → `adlc-ae-workflow` → Update. Then restart Claude Code.
+Or inside Claude Code: `/plugin` → Marketplaces → `adlc-ae-workflow` → Update.
 
-An install is per project **and** per scope (`local`, `project`, `user`), and each one updates separately. Run the update from the project's folder, once per scope it is installed in (`claude plugin update harness@adlc-ae-workflow --scope local`, then `--scope project`); a stale `local` install wins over a newer `project` one. `claude plugin list` shows what is active. To update once for every project, install with `--scope user` instead.
+## Project Structure
 
-Projects using the build loop also need the new harness inside their Docker image. Set `ARG HARNESS_VERSION` in `.sandcastle/Dockerfile` to the new version, then rebuild:
-
-```bash
-npx sandcastle docker build-image
 ```
+harness/
+├── .claude-plugin/plugin.json    manifest
+├── agents/                       code-reviewer, security-auditor, test-engineer
+├── hooks/                        guard-github-edits, asvs gates, notify-record-changes
+├── references/                   core-behaviors
+├── skills/
+│   ├── setup/                    setup-all, setup-harness-skills, setup-preview-deploys, setup-security-level, setup-telemetry
+│   ├── design/                   design, grilling, grill-with-docs, domain-modeling, research, prototype, to-spec, security-asvs
+│   ├── plan/                     plan, to-tickets
+│   ├── build/                    build, implement, implement-spec, tdd, code-review, browser-testing, pr, diagnosing-bugs, codebase-design
+│   └── meta/                     triage
+└── templates/
+    └── sandcastle/               build loop template
 
-## Flow
-
-Two commands, one per phase. Each walks its phase's skills in order and resumes where it left off.
-
-1. **`/harness:plan <input>`**: takes any input (text, a brainstorm, `@file`, `@folder`, a SoW or RFP, a URL or `#issue`), sets the repo up on first use, reads the sources into a short brief, grills what they leave open (writing `GLOSSARY.md` and ADRs), publishes the spec as an issue labelled `prd`, and cuts it into tickets with blocking links. It stops twice for your approval: before the spec, and on the ticket breakdown.
-2. **`/harness:build #<spec>`**: sets the build loop up on first use, then builds each unblocked ticket in its own sandbox (tdd → test gate → review) and opens a PR per ticket.
-3. **You review each PR**: **merge** to approve (closes the ticket), or add the **`changes-requested`** label with comments to send it back. Run step 2 again to continue.
-
-Each step can also be run on its own: `/harness:setup-harness-skills`, `/harness:grill-with-docs`, `/harness:to-spec`, `/harness:to-tickets #<spec>`, `/harness:setup-build-loop`, `/harness:setup-preview-deploys`, `/harness:implement-spec #<spec>`.
-
-## Labels
-
-| Label | On | Meaning | Created by |
-|---|---|---|---|
-| `prd` | Issue | The spec; never built directly | `setup-harness-skills` |
-| `ready-for-agent` | Issue | Ticket the build loop may build | `setup-harness-skills` |
-| `ready-for-human` | Issue | Needs a person (e.g. failed the loop) | `setup-harness-skills` |
-| `needs-triage` | Issue | Incoming, not yet evaluated | `setup-harness-skills` |
-| `needs-info` | Issue | Waiting for the reporter | `setup-harness-skills` |
-| `wontfix` | Issue | Won't be done | `setup-harness-skills` |
-| `bug` / `enhancement` | Issue | Category, set by triage | `setup-harness-skills` |
-| `changes-requested` | PR | Send the PR back to the agents for rework | `setup-build-loop` |
-
-Each ticket is built on the branch `sandcastle/issue-<n>`. In a project, `docs/agents/triage-labels.md` holds the label mapping; `gh label list` shows what exists on GitHub.
-
-## Modifications
-
-What the harness changes compared with the original Matt Pocock and Addy Osmani files in `reference/`.
-
-**Behaviour changes**
-
-| File | Change |
-|---|---|
-| `build/implement-spec` | Fully rewritten. The original ran subagents in local git worktrees with one review at the end; this one runs the Sandcastle loop and opens one PR per ticket. |
-| `plan/to-spec` | The PRD gets the `prd` label instead of `ready-for-agent`, and the skill reports the PRD number. |
-| `plan/to-tickets` | The `Parent` link to the PRD is always required. The breakdown quiz shows a layer line per ticket (`UI ✅ · API ✅ · Data ✅ · Tests ✅`) and flags cross-cutting tickets, to spot horizontal slices at a glance. |
-| `setup/setup-harness-skills` | Renamed from `setup-matt-pocock-skills`. The label section always runs and creates the labels on GitHub, including `prd`. |
-| `plan/grilling` | Asks the user first whether to be grilled **one question at a time** or **a round at a time** (the whole frontier per message, the original behaviour and the recommended default). |
-| `setup/setup-build-loop`, `setup/setup-preview-deploys` | New. |
-| `plan/plan`, `build/build` | New. One entry command per phase, written in Matt Pocock's style; they sequence the existing skills and resume where the last session stopped. `build` never codes a ticket itself; everything goes through the loop. |
-| `hooks/guard-github-edits` | New. Editing or deleting existing GitHub issues (specs, tickets), PRs or comments needs explicit human approval; blocked inside build-loop sandboxes. |
-| `hooks/notify-record-changes` | New. Shows a notice whenever an agent creates, edits, overwrites or deletes an ADR or the glossary. Never blocks; the ADR and glossary flow stays as Matt designed it. In the build loop, the PR lists any ADR/glossary files it changes. |
-| `templates/sandcastle/*` | New. Based on Sandcastle's `parallel-planner-with-review` template, with all prompts rewritten for the harness. |
-
-**Name changes only** (skill references updated to the `harness:` namespace, e.g. `tdd` → `harness:tdd`): `grill-with-docs`, `triage`, `implement`, `tdd`, `code-review`.
-
-**Unchanged:** `domain-modeling`, `research`, `prototype`, `pr`, `diagnosing-bugs`, `codebase-design`.
-
-**Removed:** Addy Osmani's four agents (`code-reviewer`, `security-auditor`, `test-engineer`, `web-performance-auditor`). Nothing in the harness used them; they remain in `reference/addy-osmani/agents/`.
+sandcastle/       mattpocock/sandcastle fork (git submodule)
+reference/        source repos (Addy Osmani, Matt Pocock) — reference only
+```
 
 ## Credits
 
-The skills are adapted from [mattpocock/skills](https://github.com/mattpocock/skills) and [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills), both MIT; their licences are in `reference/`.
+Skills adapted from [mattpocock/skills](https://github.com/mattpocock/skills) and [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills), both MIT. Licences in `reference/`.

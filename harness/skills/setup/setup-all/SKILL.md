@@ -52,6 +52,8 @@ Setup complete.
 
 Tell the user they can re-run any sub-skill individually (`/harness:setup-harness-skills`, `/harness:setup-preview-deploys`, `/harness:setup-security-level`, `/harness:setup-telemetry`) to change a single setting later.
 
+Point at the next phase: `/harness:design` to take an idea, PRD, or any input and produce a spec.
+
 ## Verification
 
 - [ ] Each sub-setup reported success or was skipped with reason

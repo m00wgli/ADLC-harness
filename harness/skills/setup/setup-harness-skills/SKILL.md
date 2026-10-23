@@ -92,6 +92,54 @@ If an `## Agent skills` block already exists in the chosen file, update its cont
 The block:
 
 ```markdown
+## Harness workflow
+
+setup → design → plan → build
+
+| Phase  | Skill            | When                                 |
+|--------|------------------|--------------------------------------|
+| Setup  | /harness:setup   | Once, before first use               |
+| Design | /harness:design  | New work needs a spec (PRD)          |
+| Plan   | /harness:plan    | Spec exists, needs buildable tickets |
+| Build  | /harness:build   | Pick up a ticket and ship a PR       |
+
+### Skill routing
+
+    ├── /setup
+    │   ├── First time in this repo? ──────→ /harness:setup
+    │   ├── Change tracker/labels/domain? ─→ /harness:setup-harness-skills
+    │   ├── Configure preview deploys? ────→ /harness:setup-preview-deploys
+    │   ├── Set ASVS security level? ──────→ /harness:setup-security-level
+    │   └── Configure OTLP telemetry? ─────→ /harness:setup-telemetry
+    │
+    ├── /design
+    │   ├── New work, need a spec? ────────→ /harness:design
+    │   ├── Stress-test an idea? ──────────→ /harness:grilling
+    │   ├── Grill + create ADRs/glossary? ─→ /harness:grill-with-docs
+    │   ├── Build glossary + ADRs? ────────→ /harness:domain-modeling
+    │   ├── Research a question? ──────────→ /harness:research
+    │   ├── Throwaway prototype? ──────────→ /harness:prototype
+    │   ├── Write the spec (PRD)? ─────────→ /harness:to-spec
+    │   └── Map ASVS security reqs? ───────→ /harness:security-asvs
+    │
+    ├── /plan
+    │   ├── Spec exists, need tickets? ────→ /harness:plan
+    │   └── Break spec into tickets? ──────→ /harness:to-tickets
+    │
+    ├── /build
+    │   ├── Build all tickets for a spec? ─→ /harness:build
+    │   ├── Implement one ticket? ─────────→ /harness:implement-spec
+    │   ├── Implement from spec/tickets? ──→ /harness:implement
+    │   ├── Test-first development? ───────→ /harness:tdd
+    │   ├── Review code (standards+spec)? ─→ /harness:code-review
+    │   ├── Browser UI verification? ──────→ /harness:browser-testing
+    │   ├── Deep-module design? ───────────→ /harness:codebase-design
+    │   ├── Diagnose a hard bug? ──────────→ /harness:diagnosing-bugs
+    │   └── Write a PR description? ───────→ /harness:pr
+    │
+    └── /meta
+        └── Triage issues / PRs? ──────────→ /harness:triage
+
 ## Agent skills
 
 ### Issue tracker
