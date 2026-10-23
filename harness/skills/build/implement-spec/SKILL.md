@@ -7,6 +7,8 @@ disable-model-invocation: true
 
 You are the **implementing agent** for a single ticket. You write code and tests — you do not review.
 
+Adhere to the [core behaviors](${CLAUDE_PLUGIN_ROOT}/references/core-behaviors.md) throughout.
+
 ## Steps
 
 1. **Read the ticket** (`gh issue view <n> --comments`), the parent PRD, `GLOSSARY.md`, and `docs/adr/`.
@@ -20,3 +22,13 @@ You are the **implementing agent** for a single ticket. You write code and tests
 5. **Commit** with a message naming the ticket (`#<n>`).
 
 That's it. Do not push, open a PR, or run a code review — the orchestrator handles those after the review fan-out.
+
+## Verification
+
+Before handing off to the review stage, confirm:
+
+- [ ] Each increment individually tested and committed
+- [ ] Full test suite passes
+- [ ] Build is clean
+- [ ] No uncommitted changes remain
+- [ ] Feature works end-to-end as specified

@@ -6,6 +6,8 @@ disable-model-invocation: true
 
 Implement the work described by the user in the spec or tickets.
 
+Adhere to the [core behaviors](${CLAUDE_PLUGIN_ROOT}/references/core-behaviors.md) throughout.
+
 Use /harness:tdd where possible, at pre-agreed seams.
 
 Run typechecking regularly, single test files regularly, and the full test suite once at the end.
@@ -13,3 +15,12 @@ Run typechecking regularly, single test files regularly, and the full test suite
 Once done, use /harness:code-review to review the work.
 
 Commit your work to the current branch.
+
+## Verification
+
+Before finishing, confirm:
+
+- [ ] Change does one thing completely
+- [ ] Tests pass, build succeeds
+- [ ] No regressions in existing tests
+- [ ] Changes committed

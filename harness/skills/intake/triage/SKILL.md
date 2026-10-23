@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Triage
 
-Move issues on the project issue tracker through a small state machine of triage roles.
+Move issues on the project issue tracker through a small state machine of triage roles. Adhere to the [core behaviors](${CLAUDE_PLUGIN_ROOT}/references/core-behaviors.md) throughout.
 
 If this repo treats external pull requests as a request surface (see the issue-tracker config), triage covers them too: **a PR is an issue with attached code**, using the same roles, same states, and same machine, with a few deltas marked "for a PR" below. Resolve a bare `#42` to an issue or PR per the tracker config.
 
@@ -110,3 +110,9 @@ Capture everything resolved during grilling under "established so far" so the wo
 ## Resuming a previous session
 
 If prior triage notes exist on the issue or PR, read them, check whether the reporter has answered any outstanding questions, and present an updated picture before continuing. Don't re-ask resolved questions.
+
+## Verification
+
+- [ ] Issue was read from the tracker, not paraphrased
+- [ ] Exactly one label applied from the triage vocabulary
+- [ ] If needs-info, a specific question was posted as a comment

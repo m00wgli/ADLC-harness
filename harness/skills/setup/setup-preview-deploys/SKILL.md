@@ -6,6 +6,8 @@ disable-model-invocation: true
 
 # Setup Preview Deploys
 
+Adhere to the [core behaviors](${CLAUDE_PLUGIN_ROOT}/references/core-behaviors.md) throughout.
+
 Give every pull request a **preview**: its branch, built and deployed by Vercel to its own URL. The human reviewing a PR opens the preview and tests the behaviour, instead of reading the code alone.
 
 Vercel reports each preview back to GitHub as a **deployment** on the PR's branch. Everything downstream reads it from there, so after this setup nothing else needs to know about Vercel.
@@ -103,3 +105,8 @@ Every PR gets a Vercel preview. See `docs/agents/preview-deploys.md`.
 Commit `docs/agents/preview-deploys.md`, the `CLAUDE.md` change, and `vercel.json` if one was created. Never `.vercel/`.
 
 Tell the user that from now on every PR, including the build loop's, gets a preview link on GitHub.
+
+## Verification
+
+- [ ] Preview deploy config file exists and is valid
+- [ ] `docs/agents/preview-deploys.md` committed

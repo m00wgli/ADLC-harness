@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Setup Telemetry
 
-Configure Claude Code's built-in OpenTelemetry export so every session ships traces (tool calls, API requests, token usage) to the user's observability platform.
+Configure Claude Code's built-in OpenTelemetry export so every session ships traces (tool calls, API requests, token usage) to the user's observability platform. Adhere to the [core behaviors](${CLAUDE_PLUGIN_ROOT}/references/core-behaviors.md) throughout.
 
 ## 1. Check current state
 
@@ -115,3 +115,9 @@ Tell the user the telemetry config is written. Mention:
 - Global exporter config lives in `~/.claude/settings.json`; per-project service name in `.claude/settings.json`.
 - To set up a local collector stack, `ccusage` or a Grafana LGTM stack are good starting points.
 - If traces don't appear, run `claude --debug-file debug.log` and look for `[3P telemetry]` entries.
+
+## Verification
+
+- [ ] Global `~/.claude/settings.json` has all required OTEL vars
+- [ ] Per-project `.claude/settings.json` has `OTEL_SERVICE_NAME`
+- [ ] Smoke test span received at endpoint (or collector noted as not yet running)

@@ -7,6 +7,8 @@ description: Diagnosis loop for hard bugs and performance regressions. Use when 
 
 A discipline for hard bugs. Skip phases only when explicitly justified.
 
+Adhere to the [core behaviors](${CLAUDE_PLUGIN_ROOT}/references/core-behaviors.md) throughout.
+
 When exploring the codebase, read `GLOSSARY.md` (if it exists) to get a clear mental model of the relevant modules, and check ADRs in the area you're touching.
 
 ## Redact
@@ -136,3 +138,13 @@ Required before declaring done:
 - [ ] All `[DEBUG-...]` instrumentation removed (`grep` the prefix)
 - [ ] Throwaway prototypes deleted (or moved to a clearly-marked debug location)
 - [ ] The hypothesis that turned out correct is stated in the commit / PR message, so the next debugger learns
+
+## Verification
+
+Before finishing, confirm:
+
+- [ ] Root cause identified and documented
+- [ ] Fix addresses root cause, not just symptoms
+- [ ] Regression test exists that fails without the fix
+- [ ] All existing tests pass
+- [ ] Original bug scenario verified end-to-end

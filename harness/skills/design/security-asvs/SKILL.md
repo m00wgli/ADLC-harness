@@ -8,6 +8,8 @@ disable-model-invocation: true
 
 Map OWASP ASVS requirements to the feature described by the current grilling and spec. This skill runs **after** the spec is published.
 
+Adhere to the [core behaviors](${CLAUDE_PLUGIN_ROOT}/references/core-behaviors.md) throughout.
+
 The filtering is **fully deterministic** — the `asvs-filter.mjs` script produces the exact requirement list. The agent's only contribution is `scope` and `rationale` per requirement. A PreToolUse hook enforces that the checklist's `req_id`, `req_description`, `chapter_id`, and `chapter_name` match the filter output verbatim.
 
 ## Prerequisites

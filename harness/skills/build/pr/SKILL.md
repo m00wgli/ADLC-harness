@@ -9,6 +9,8 @@ metadata:
     url: "https://github.com/humanlayer/skills/blob/main/plugins/show-me/skills/show-me/SKILL.md"
 ---
 
+Adhere to the [core behaviors](${CLAUDE_PLUGIN_ROOT}/references/core-behaviors.md) throughout.
+
 Use this template for writing the PR body:
 
 ```markdown
@@ -187,3 +189,13 @@ Read the ticket's `## Security (ASVS)` checklist. For each requirement listed th
 Every req ID in this table must match the ticket's ASVS section exactly — no additions, no omissions. The reviewer uses this to verify that the code delivers what the ticket required.
 
 If a rework cycle changes any control, update this table to reflect the current implementation.
+
+## Verification
+
+Before opening the PR, confirm:
+
+- [ ] Commit does one logical thing
+- [ ] Message explains the why
+- [ ] No secrets in the diff
+- [ ] No formatting-only changes mixed with behavior changes
+- [ ] PR body links to the issue

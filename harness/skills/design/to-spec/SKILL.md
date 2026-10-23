@@ -6,6 +6,8 @@ disable-model-invocation: true
 
 This skill takes the current conversation context and codebase understanding and produces a spec. Do NOT interview the user; just synthesize what you already know.
 
+Adhere to the [core behaviors](${CLAUDE_PLUGIN_ROOT}/references/core-behaviors.md) throughout.
+
 The issue tracker and triage label vocabulary should have been provided to you. If not, tell the user to run `/harness:setup-harness-skills`.
 
 ## Process
@@ -76,3 +78,13 @@ A description of the things that are out of scope for this spec.
 Any further notes about the feature.
 
 </spec-template>
+
+## Verification
+
+Before publishing the spec, confirm:
+
+- [ ] Spec covers all template sections (Problem, Solution, User Stories, Implementation Decisions, Testing, Out of Scope)
+- [ ] Success criteria are specific and testable
+- [ ] User stories are extensive, not just happy path
+- [ ] Spec is published to issue tracker with `prd` label
+- [ ] Sources listed in Further Notes for traceability

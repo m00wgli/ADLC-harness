@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Setup
 
-One-stop setup for the harness plugin. Runs four sub-skills in sequence:
+One-stop setup for the harness plugin. Runs four sub-skills in sequence. Adhere to the [core behaviors](${CLAUDE_PLUGIN_ROOT}/references/core-behaviors.md) throughout.
 
 1. **Core config** — issue tracker, triage labels, domain docs
 2. **Preview deploys** (optional) — Vercel preview URLs on every PR
@@ -51,3 +51,7 @@ Setup complete.
 ```
 
 Tell the user they can re-run any sub-skill individually (`/harness:setup-harness-skills`, `/harness:setup-preview-deploys`, `/harness:setup-security-level`, `/harness:setup-telemetry`) to change a single setting later.
+
+## Verification
+
+- [ ] Each sub-setup reported success or was skipped with reason

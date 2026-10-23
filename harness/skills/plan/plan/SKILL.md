@@ -7,6 +7,8 @@ disable-model-invocation: true
 
 A spec (PRD) is on the issue tracker and needs to become buildable tickets. The plan phase reads the spec and cuts it into ordered, dependency-aware tickets that the build phase can pick up one by one.
 
+Adhere to the [core behaviors](${CLAUDE_PLUGIN_ROOT}/references/core-behaviors.md) throughout.
+
 ## Keep it in one window
 
 Run the ticket cutting in **one unbroken context window** with the spec loaded. Don't compact or clear until the tickets are published.
@@ -37,5 +39,15 @@ Read [to-tickets](${CLAUDE_PLUGIN_ROOT}/skills/plan/to-tickets/SKILL.md) and fol
 Report the spec and its tickets **by name**, marking which ones are unblocked now. Then point at the build phase: `/harness:build #<spec>`.
 
 If there are other specs still waiting for tickets, list them.
+
+## Verification
+
+Before handing off, confirm:
+
+- [ ] Spec was loaded from the issue tracker, not from memory
+- [ ] Every task has acceptance criteria
+- [ ] Every task has a verification step
+- [ ] Dependencies ordered — no ticket references an unbuilt ticket
+- [ ] Hand-off to `/harness:build` stated with spec number
 
 The issue tracker should have been provided to you. If not, tell the user to run `/harness:setup-harness-skills`.

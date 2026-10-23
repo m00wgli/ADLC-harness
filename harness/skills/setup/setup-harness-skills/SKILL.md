@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Setup Harness Skills
 
-Scaffold the per-repo configuration that the engineering skills assume:
+Scaffold the per-repo configuration that the engineering skills assume. Adhere to the [core behaviors](${CLAUDE_PLUGIN_ROOT}/references/core-behaviors.md) throughout.
 
 - **Issue tracker**: where issues live (GitHub by default; local markdown is also supported out of the box)
 - **Triage labels**: the strings used for the five canonical triage roles
@@ -157,3 +157,8 @@ If the API returns a 403 (plan doesn't support branch protection on private repo
 ### 6. Done
 
 Tell the user the setup is complete and which engineering skills will now read from these files. Mention they can edit `docs/agents/*.md` directly later; re-running this skill is only necessary if they want to switch issue trackers or restart from scratch.
+
+## Verification
+
+- [ ] `docs/agents/issue-tracker.md` exists and is valid
+- [ ] CLAUDE.md (or AGENTS.md) references the harness skills

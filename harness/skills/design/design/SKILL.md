@@ -9,6 +9,8 @@ Work has arrived and needs to be understood before it can be planned. It can com
 
 The skills underneath do the real work. This one only decides which step is next, runs it, and stops at the points where the user must agree before going on.
 
+Adhere to the [core behaviors](${CLAUDE_PLUGIN_ROOT}/references/core-behaviors.md) throughout.
+
 ## Sources are facts, the user owns decisions
 
 A source document answers questions; it doesn't make decisions. Anything a source states is a **fact** you look up yourself, never a question for the user. What the sources leave open, contradict, or only imply is a **decision**, and that goes to the user in the grilling. A 40-page RFP should shorten the grilling, not lengthen it.
@@ -76,5 +78,16 @@ Otherwise, read [security-asvs](${CLAUDE_PLUGIN_ROOT}/skills/design/security-asv
 Report the spec **by name and number**. Then point at the plan phase: `/harness:plan #<spec>` to cut tickets.
 
 If step 2 split the sources into several pieces of work, list the ones still undesigned.
+
+## Verification
+
+Before handing off, confirm:
+
+- [ ] Sources were read first-hand, not summarized from memory
+- [ ] Every open or contradicted point from the sources was grilled
+- [ ] Testing seams were identified and confirmed with the user
+- [ ] User gave explicit "yes" at the checkpoint before spec writing
+- [ ] Spec published as an issue with `prd` label
+- [ ] Security requirements step ran or was explicitly skipped
 
 The issue tracker should have been provided to you. If not, tell the user to run `/harness:setup-harness-skills`.

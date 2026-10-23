@@ -8,6 +8,8 @@ disable-model-invocation: true
 
 Break a plan, spec, or conversation into a set of **tickets**: tracer-bullet vertical slices, each declaring the tickets that **block** it.
 
+Adhere to the [core behaviors](${CLAUDE_PLUGIN_ROOT}/references/core-behaviors.md) throughout.
+
 The issue tracker and triage label vocabulary should have been provided to you. If not, tell the user to run `/harness:setup-harness-skills`.
 
 ## Process
@@ -139,3 +141,12 @@ This reads every ticket for the PRD from the issue tracker and checks:
 - No unknown requirement appears
 
 If it fails, fix the distribution (move, add or remove ASVS criteria on the tickets) and run it again. Do not proceed to `/harness:build` until this passes.
+
+## Verification
+
+Before publishing tickets, confirm:
+
+- [ ] Each ticket is a vertical slice — one deployable unit of value
+- [ ] ASVS requirements distributed: every applicable req appears in exactly one ticket
+- [ ] Acceptance criteria are copy-paste testable, not vague
+- [ ] Tickets published with `ready-for-agent` label

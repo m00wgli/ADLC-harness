@@ -7,6 +7,8 @@ disable-model-invocation: true
 
 A spec and its tickets are on the issue tracker, and the tickets need to become code. The build phase orchestrates four stages per ticket: **implement → review → fix → PR**. Three independent review personas run in parallel in separate contexts, so the implementing agent never reviews its own code.
 
+Adhere to the [core behaviors](${CLAUDE_PLUGIN_ROOT}/references/core-behaviors.md) throughout.
+
 **The human is the quality gate.** Nothing is merged and no issue is closed by the agents:
 
 - **Merge the PR = approve.** GitHub closes the ticket through `Closes #<n>`, and the next run builds what it unblocked.
@@ -99,5 +101,15 @@ When the pass ends, report:
 - Tickets waiting on review or blocked
 
 Then tell the user: review the PRs, merge to approve or label `changes-requested` to send back, and run `/harness:build #<PRD>` again to continue.
+
+## Verification
+
+Before reporting, confirm for each ticket built:
+
+- [ ] Implementation committed before review agents spawned
+- [ ] All three review personas ran (code-reviewer, security-auditor, test-engineer)
+- [ ] Every Critical/Required finding addressed or explicitly deferred with user approval
+- [ ] PR opened and linked to issue with `Closes #<n>`
+- [ ] No secrets in the diff
 
 The issue tracker should have been provided to you. If not, tell the user to run `/harness:setup-harness-skills`.

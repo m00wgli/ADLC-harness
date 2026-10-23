@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Setup Security Level
 
-Configure the project's OWASP ASVS compliance level. This determines which security requirements are enforced during planning (`/harness:plan`). Applicable chapters are selected later, during planning, based on the actual feature being built.
+Configure the project's OWASP ASVS compliance level. Adhere to the [core behaviors](${CLAUDE_PLUGIN_ROOT}/references/core-behaviors.md) throughout. This determines which security requirements are enforced during planning (`/harness:plan`). Applicable chapters are selected later, during planning, based on the actual feature being built.
 
 ## 1. Check current state
 
@@ -45,4 +45,8 @@ No ASVS compliance tracking. See `docs/agents/security-level.md`.
 
 ## 4. Done
 
-Tell the user the security level is configured. If a level other than none was set, mention that `/harness:plan` will select applicable chapters and map ASVS requirements during the security-asvs step.
+Tell the user the security level is configured. If a level other than none was set, mention that `/harness:design` will select applicable chapters and map ASVS requirements during the security-asvs step.
+
+## Verification
+
+- [ ] `docs/agents/security-level.md` exists with a valid level

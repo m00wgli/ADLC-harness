@@ -7,6 +7,8 @@ description: Build a throwaway prototype to answer a design question. Use when t
 
 A prototype is **throwaway code that answers a question**. The question decides the shape.
 
+Adhere to the [core behaviors](${CLAUDE_PLUGIN_ROOT}/references/core-behaviors.md) throughout.
+
 ## Pick a branch
 
 Identify which question is being answered, using the user's prompt, the surrounding code, or by asking if the user is around:
@@ -24,3 +26,11 @@ The two branches produce very different artifacts, so getting this wrong wastes 
 4. **Skip the polish.** No tests, no error handling beyond what makes the prototype _runnable_, no abstractions. The point is to learn something fast.
 5. **Surface the state.** After every action (logic) or on every variant switch (UI), print or render the full relevant state so the user can see what changed.
 6. **Capture it when done.** Fold any validated decision into the real code, then capture the prototype itself as a **primary source**: commit it to a throwaway branch, out of main, and leave a context pointer to that branch on the implementation issue. Capture the answer too (the verdict and the question it settled) in the issue or a commit. The main branch keeps only the validated decision.
+
+## Verification
+
+Before finishing, confirm:
+
+- [ ] Prototype answered a specific question from the grilling
+- [ ] Decision-rich snippets extracted for the spec; throwaway code discarded
+- [ ] No prototype code was carried into the implementation as-is

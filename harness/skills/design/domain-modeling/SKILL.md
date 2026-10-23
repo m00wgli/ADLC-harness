@@ -7,6 +7,8 @@ description: Build and sharpen a project's domain model. Use when discussing cod
 
 Actively build and sharpen the project's domain model as you design. This is the *active* discipline: challenging terms, inventing edge-case scenarios, and writing the glossary and decisions down the moment they crystallise. (Merely *reading* `GLOSSARY.md` for vocabulary is not this skill: that's a one-line habit any skill can do. This skill is for when you're changing the model, not just consuming it.)
 
+Adhere to the [core behaviors](${CLAUDE_PLUGIN_ROOT}/references/core-behaviors.md) throughout.
+
 ## File structure
 
 Most repos have a single context:
@@ -72,3 +74,12 @@ Only offer to create an ADR when all three are true:
 3. **The result of a real trade-off**: there were genuine alternatives and you picked one for specific reasons
 
 If any of the three is missing, skip the ADR. Use the format in [ADR-FORMAT.md](./ADR-FORMAT.md).
+
+## Verification
+
+Before finishing, confirm:
+
+- [ ] Every new term has a glossary entry with a single definition
+- [ ] ADRs exist for all significant architectural decisions
+- [ ] No synonyms or overloaded terms remain in the glossary
+- [ ] Glossary and ADRs are committed, not just in conversation
