@@ -171,6 +171,9 @@ Files that must be kept in sync when skills, agents, hooks, or references change
 | `harness/.claude-plugin/plugin.json` | `harness/skills/`, `harness/agents/` | `skills` and `agents` arrays list every folder/file |
 | `setup-harness-skills/SKILL.md` — Skill routing tree | all `SKILL.md` files | New/removed skills appear in the routing tree |
 | `setup-harness-skills/SKILL.md` — CLAUDE.md template | same | Phase table and routing tree written to target repos |
+| `setup-harness-skills/SKILL.md` — Process & menu | setup sub-skills, label list | References to sub-skills, label names, and CLI commands stay current |
+| `setup-harness-skills/*.md` seed templates | tracker CLIs, label conventions | Templates match current `gh`/`glab` APIs and label set |
+| `setup-all/SKILL.md` | setup sub-skills | Sub-skill list and run order matches what exists |
 | `harness/references/asvs/asvs-5.0.0.flat.json` | [OWASP ASVS releases](https://github.com/OWASP/ASVS) | Update when ASVS publishes a new version |
 | `harness/references/core-behaviors.md` | all `SKILL.md` files | Every skill links to this; changes affect all phases |
 | `harness/hooks/hooks.json` | `harness/hooks/*.mjs` | Entry for every hook script, events match |
