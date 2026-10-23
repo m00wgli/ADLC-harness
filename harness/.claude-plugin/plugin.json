@@ -1,9 +1,9 @@
 {
   "name": "harness",
   "displayName": "AE Harness",
-  "version": "0.7.4",
-  "description": "Agent harness: /harness:setup configures the project (now with optional OTLP telemetry); /harness:plan takes an idea to a spec and GitHub tickets; /harness:build builds each ticket with independent review personas (code-reviewer, security-auditor, test-engineer) and opens a PR for human review.",
+  "version": "0.8.0",
+  "description": "Agent harness: /harness:setup configures the project; /harness:design takes any input to a spec (PRD); /harness:plan cuts the spec into tickets; /harness:build builds each ticket with independent review personas (code-reviewer, security-auditor, test-engineer) and opens a PR for human review.",
   "author": { "name": "Dean Terneu" },
-  "skills": ["./skills/setup/", "./skills/plan/", "./skills/intake/", "./skills/build/"],
+  "skills": ["./skills/setup/", "./skills/design/", "./skills/plan/", "./skills/intake/", "./skills/build/"],
   "agents": ["./agents/code-reviewer.md", "./agents/security-auditor.md", "./agents/test-engineer.md"]
 }
