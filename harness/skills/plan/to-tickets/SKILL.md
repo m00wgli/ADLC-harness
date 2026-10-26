@@ -1,6 +1,6 @@
 ---
 name: to-tickets
-description: Break a plan, spec, or the current conversation into a set of tracer-bullet tickets, each declaring its blocking edges, published to the configured tracker (edges as text in one file per ticket locally, or native blocking links on a real tracker).
+description: Break a plan, spec, or the current conversation into a set of tracer-bullet tickets, each declaring its blocking edges, published to the configured tracker. On GitHub, native dependency edges are wired immediately after each issue is created.
 disable-model-invocation: true
 ---
 
@@ -69,7 +69,20 @@ Iterate until the user approves the breakdown.
 Publish the approved tickets. **How** depends on the tracker `/harness:setup-harness-skills` configured; the tickets are the same either way, only the shape of the blocking edges changes:
 
 - **Local files** → write one file per ticket under `.scratch/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01` in dependency order (blockers first). Each file's "Blocked by" lists the numbers/titles it depends on. Use the per-ticket file template below: one ticket per file, never a single combined file.
-- **A real issue tracker (GitHub, Linear, …)** → publish one issue per ticket in dependency order (blockers first) so each ticket's blocking edges can reference real identifiers. Use the platform's native blocking / sub-issue relationship where it has one; otherwise set each ticket's "Blocked by" to the blocking issues. Apply the `ready-for-agent` triage label unless instructed otherwise; the tickets are agent-grabbable by construction.
+- **A real issue tracker (GitHub, Linear, …)** → publish one issue per ticket in dependency order (blockers first) so each ticket's blocking edges can reference real identifiers. Apply the `ready-for-agent` triage label unless instructed otherwise; the tickets are agent-grabbable by construction.
+
+  **GitHub: wire native dependency edges immediately after each issue is created.** Because issues are published in dependency order, every blocker already has a real `#number` by the time a dependent ticket is created. For each blocker listed in the ticket, run:
+
+  ```bash
+  # 1. Get the blocker's database ID (not the #number)
+  BLOCKER_DB_ID=$(gh api repos/{owner}/{repo}/issues/{blocker-number} --jq .id)
+
+  # 2. Create the native dependency edge
+  gh api --method POST repos/{owner}/{repo}/issues/{new-issue-number}/sub_issues/blocked_by \
+    -F issue_id="$BLOCKER_DB_ID"
+  ```
+
+  Do this for **every** blocker of the newly created issue before moving on to the next ticket. The `## Blocked by` section in the issue body is kept as a human-readable fallback, but the native edges are the authoritative representation — they power the frontier query and show up in the GitHub UI.
 
 Work the **frontier**: any ticket whose blockers are all done. For a purely linear chain that means top to bottom.
 
